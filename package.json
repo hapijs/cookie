@@ -1,7 +1,7 @@
 {
   "name": "hapi-auth-cookie",
   "description": "Cookie authentication plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
   "repository": "git://github.com/spumko/hapi-auth-cookie",
   "main": "index",
@@ -13,17 +13,17 @@
     "session"
   ],
   "engines": {
-    "node": "0.10.x"
+    "node": ">=0.10.22"
   },
   "dependencies": {
     "boom": "2.x.x",
     "hoek": "^1.4.x"
   },
   "peerDependencies": {
-    "hapi": "2.x.x"
+    "hapi": ">=2.x.x"
   },
   "devDependencies": {
-    "hapi": "2.x.x",
+    "hapi": "3.x.x",
     "lab": "1.x.x"
   },
   "scripts": {
