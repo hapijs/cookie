@@ -2,6 +2,7 @@
 
 var Lab = require('lab');
 var Hapi = require('hapi');
+var Hoek = require('hoek');
 
 
 // Declare internals
@@ -35,7 +36,7 @@ describe('Cookie', function () {
                 clearInvalid: true,
                 validateFunc: function (session, callback) {
 
-                    var override = Hapi.utils.clone(session);
+                    var override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -129,6 +130,66 @@ describe('Cookie', function () {
                 expect(res.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
                 expect(res.statusCode).to.equal(401);
                 done();
+            });
+        });
+    });
+
+    it('does not clear a request with invalid session', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.require('../', function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password',
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                cookie: 'special',
+                validateFunc: function (session, callback) {
+
+                    var override = Hoek.clone(session);
+                    override.something = 'new';
+
+                    return callback(null, session.user === 'valid', override);
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/resource', handler: function (request, reply) {
+
+                    expect(request.auth.credentials.something).to.equal('new');
+                    return reply('resource');
+                },
+                config: { auth: true }
+            });
+
+            server.inject('/login/invalid', function (res) {
+
+                expect(res.result).to.equal('invalid');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.headers['set-cookie']).to.not.exist;
+                    expect(res.statusCode).to.equal(401);
+                    done();
+                });
             });
         });
     });
@@ -235,6 +296,148 @@ describe('Cookie', function () {
                     expect(res.statusCode).to.equal(401);
                     done();
                 });
+            });
+        });
+    });
+
+    it('authenticates a request (no ttl)', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.require('../', function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password',
+                domain: 'example.com',
+                cookie: 'special',
+                clearInvalid: true,
+                validateFunc: function (session, callback) {
+
+                    var override = Hoek.clone(session);
+                    override.something = 'new';
+
+                    return callback(null, session.user === 'valid', override);
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.inject('/login/valid', function (res) {
+
+                expect(res.result).to.equal('valid');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.not.contain('Max-Age');
+                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                done();
+            });
+        });
+    });
+
+    it('authenticates a request (no session override)', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.require('../', function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password',
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                cookie: 'special',
+                clearInvalid: true,
+                validateFunc: function (session, callback) {
+
+                    return callback(null, session.user === 'valid');
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/resource', handler: function (request, reply) {
+
+                    return reply('resource');
+                },
+                config: { auth: true }
+            });
+
+            server.inject('/login/valid', function (res) {
+
+                expect(res.result).to.equal('valid');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.result).to.equal('resource');
+                    done();
+                });
+            });
+        });
+    });
+
+    it('errors on missing session in set()', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.require('../', function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        try {
+                            request.auth.session.set();
+                        }
+                        catch (err) {
+                            return reply(err.message);
+                        }
+
+                        return reply('ok');
+                    }
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+
+                expect(res.result).to.equal('Invalid session');
+                done();
             });
         });
     });
