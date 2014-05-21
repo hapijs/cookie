@@ -1,7 +1,7 @@
 {
   "name": "hapi-auth-cookie",
   "description": "Cookie authentication plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
   "repository": "git://github.com/spumko/hapi-auth-cookie",
   "main": "index",
