@@ -1,5 +1,8 @@
 var Hapi = require('hapi');
 
+
+var uuid = 1;       // Use seq instead of proper unique identifiers for demo only
+
 var users = {
     john: {
         id: 'john',
@@ -54,8 +57,16 @@ var login = function (request, reply) {
             + '<input type="submit" value="Login"></form></body></html>');
     }
 
-    request.auth.session.set(account);
-    return reply().redirect('/');
+    var sid = String(++uuid);
+    request.server.app.cache.set(sid, { account: account }, 0, function (err) {
+
+        if (err) {
+            reply(err);
+        }
+
+        request.auth.session.set({ sid: sid });
+        return reply().redirect('/');
+    });
 };
 
 var logout = function (request, reply) {
@@ -68,11 +79,29 @@ var server = new Hapi.Server(8000);
 
 server.pack.require('../', function (err) {
 
+    var cache = server.cache('sessions', { expiresIn: 3 * 24 * 60 * 60 * 1000 });
+    server.app.cache = cache;
+
     server.auth.strategy('session', 'cookie', {
         password: 'secret',
         cookie: 'sid-example',
         redirectTo: '/login',
-        isSecure: false
+        isSecure: false,
+        validateFunc: function (session, callback) {
+
+            cache.get(session.sid, function (err, cached) {
+
+                if (err) {
+                    return callback(err, false);
+                }
+
+                if (!cached) {
+                    return callback(null, false);
+                }
+
+                return callback(null, true, cached.item.account)
+            })
+        }
     });
 
     server.route([
