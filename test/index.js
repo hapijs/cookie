@@ -24,11 +24,11 @@ describe('Cookie', function () {
     var server = new Hapi.Server();
     before(function (done) {
 
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 ttl: 60 * 1000,
                 domain: 'example.com',
@@ -60,8 +60,7 @@ describe('Cookie', function () {
 
                     expect(request.auth.credentials.something).to.equal('new');
                     return reply('resource');
-                },
-                config: { auth: true }
+                }
             });
 
             server.route({
@@ -69,7 +68,7 @@ describe('Cookie', function () {
 
                     request.auth.session.clear();
                     return reply('logged-out');
-                }, config: { auth: true }
+                }
             });
 
             done();
@@ -137,11 +136,11 @@ describe('Cookie', function () {
     it('does not clear a request with invalid session', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 ttl: 60 * 1000,
                 domain: 'example.com',
@@ -172,8 +171,7 @@ describe('Cookie', function () {
 
                     expect(request.auth.credentials.something).to.equal('new');
                     return reply('resource');
-                },
-                config: { auth: true }
+                }
             });
 
             server.inject('/login/invalid', function (res) {
@@ -197,11 +195,11 @@ describe('Cookie', function () {
     it('authenticates a request', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 ttl: 60 * 1000,
                 cookie: 'special',
@@ -225,8 +223,7 @@ describe('Cookie', function () {
 
                     expect(request.auth.credentials.user).to.equal('steve');
                     return reply('resource');
-                },
-                config: { auth: true }
+                }
             });
 
             server.inject('/login/steve', function (res) {
@@ -250,11 +247,11 @@ describe('Cookie', function () {
     it('errors in validation function', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 ttl: 60 * 1000,
                 cookie: 'special',
@@ -279,8 +276,7 @@ describe('Cookie', function () {
 
                     expect(request.auth.credentials.user).to.equal('steve');
                     return reply('resource');
-                },
-                config: { auth: true }
+                }
             });
 
             server.inject('/login/steve', function (res) {
@@ -303,11 +299,11 @@ describe('Cookie', function () {
     it('authenticates a request (no ttl)', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 domain: 'example.com',
                 cookie: 'special',
@@ -348,11 +344,11 @@ describe('Cookie', function () {
     it('authenticates a request (no session override)', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 ttl: 60 * 1000,
                 domain: 'example.com',
@@ -380,8 +376,7 @@ describe('Cookie', function () {
                 method: 'GET', path: '/resource', handler: function (request, reply) {
 
                     return reply('resource');
-                },
-                config: { auth: true }
+                }
             });
 
             server.inject('/login/valid', function (res) {
@@ -405,11 +400,11 @@ describe('Cookie', function () {
     it('errors on missing session in set()', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.require('../', function (err) {
+        server.pack.register(require('../'), function (err) {
 
             expect(err).to.not.exist;
 
-            server.auth.strategy('default', 'cookie', {
+            server.auth.strategy('default', 'cookie', true, {
                 password: 'password',
                 ttl: 60 * 1000,
                 cookie: 'special',
@@ -447,11 +442,11 @@ describe('Cookie', function () {
         it('sends to login page (uri without query)', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.require('../', function (err) {
+            server.pack.register(require('../'), function (err) {
 
                 expect(err).to.not.exist;
 
-                server.auth.strategy('default', 'cookie', {
+                server.auth.strategy('default', 'cookie', true, {
                     password: 'password',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login',
@@ -462,7 +457,7 @@ describe('Cookie', function () {
                     method: 'GET', path: '/', handler: function (request, reply) {
 
                         return reply('never');
-                    }, config: { auth: true }
+                    }
                 });
 
                 server.inject('/', function (res) {
@@ -477,11 +472,11 @@ describe('Cookie', function () {
         it('sends to login page (uri with query)', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.require('../', function (err) {
+            server.pack.register(require('../'), function (err) {
 
                 expect(err).to.not.exist;
 
-                server.auth.strategy('default', 'cookie', {
+                server.auth.strategy('default', 'cookie',true,  {
                     password: 'password',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login?mode=1',
@@ -492,7 +487,7 @@ describe('Cookie', function () {
                     method: 'GET', path: '/', handler: function (request, reply) {
 
                         return reply('never');
-                    }, config: { auth: true }
+                    }
                 });
 
                 server.inject('/', function (res) {
@@ -507,11 +502,11 @@ describe('Cookie', function () {
         it('sends to login page and does not append the next query when appendNext is false', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.require('../', function (err) {
+            server.pack.register(require('../'), function (err) {
 
                 expect(err).to.not.exist;
 
-                server.auth.strategy('default', 'cookie', {
+                server.auth.strategy('default', 'cookie', true, {
                     password: 'password',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login?mode=1',
@@ -522,7 +517,7 @@ describe('Cookie', function () {
                     method: 'GET', path: '/', handler: function (request, reply) {
 
                         return reply('never');
-                    }, config: { auth: true }
+                    }
                 });
 
                 server.inject('/', function (res) {
@@ -534,14 +529,14 @@ describe('Cookie', function () {
             });
         });
 
-        it('does not redirect on try', function (done) {
+        it('redirect on try', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.require('../', function (err) {
+            server.pack.register(require('../'), function (err) {
 
                 expect(err).to.not.exist;
 
-                server.auth.strategy('default', 'cookie', {
+                server.auth.strategy('default', 'cookie', true, {
                     password: 'password',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login',
@@ -557,8 +552,7 @@ describe('Cookie', function () {
 
                 server.inject('/', function (res) {
 
-                    expect(res.result).to.equal('try');
-                    expect(res.statusCode).to.equal(200);
+                    expect(res.statusCode).to.equal(302);
                     done();
                 });
             });
