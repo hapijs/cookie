@@ -23,7 +23,7 @@ var home = function (request, reply) {
 var login = function (request, reply) {
 
     if (request.auth.isAuthenticated) {
-        return reply().redirect('/');
+        return reply.redirect('/');
     }
 
     var message = '';
@@ -65,24 +65,24 @@ var login = function (request, reply) {
         }
 
         request.auth.session.set({ sid: sid });
-        return reply().redirect('/');
+        return reply.redirect('/');
     });
 };
 
 var logout = function (request, reply) {
 
     request.auth.session.clear();
-    return reply().redirect('/');
+    return reply.redirect('/');
 };
 
 var server = new Hapi.Server(8000);
 
-server.pack.require('../', function (err) {
+server.pack.register(require('../'), function (err) {
 
     var cache = server.cache('sessions', { expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;
 
-    server.auth.strategy('session', 'cookie', {
+    server.auth.strategy('session', 'cookie', true, {
         password: 'secret',
         cookie: 'sid-example',
         redirectTo: '/login',
@@ -105,13 +105,13 @@ server.pack.require('../', function (err) {
     });
 
     server.route([
-        { method: 'GET', path: '/', config: { handler: home, auth: true } },
-        { method: ['GET', 'POST'], path: '/login', config: { handler: login, auth: { mode: 'try' } } },
-        { method: 'GET', path: '/logout', config: { handler: logout, auth: true } }
+        { method: 'GET', path: '/', config: { handler: home } },
+        { method: ['GET', 'POST'], path: '/login', config: { handler: login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
+        { method: 'GET', path: '/logout', config: { handler: logout } }
     ]);
 
     server.start(function () {
-        
+
         console.log('Server ready');
     });
 });

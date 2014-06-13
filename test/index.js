@@ -88,6 +88,7 @@ describe('Cookie', function () {
             server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                 expect(res.statusCode).to.equal(200);
+                expect(res.headers['set-cookie']).to.not.exist;
                 expect(res.result).to.equal('resource');
                 done();
             });
@@ -464,6 +465,44 @@ describe('Cookie', function () {
 
                     expect(res.statusCode).to.equal(302);
                     expect(res.headers.location).to.equal('http://example.com/login?next=%2F');
+                    done();
+                });
+            });
+        });
+
+        it('skips when route override', function (done) {
+
+            var server = new Hapi.Server();
+            server.pack.register(require('../'), function (err) {
+
+                expect(err).to.not.exist;
+
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password',
+                    ttl: 60 * 1000,
+                    redirectTo: 'http://example.com/login',
+                    appendNext: true
+                });
+
+                server.route({
+                    method: 'GET',
+                    path: '/',
+                    handler: function (request, reply) {
+
+                        return reply('never');
+                    },
+                    config: {
+                        plugins: {
+                            'hapi-auth-cookie': {
+                                redirectTo: false
+                            }
+                        }
+                    }
+                });
+
+                server.inject('/', function (res) {
+
+                    expect(res.statusCode).to.equal(401);
                     done();
                 });
             });

@@ -18,7 +18,9 @@ of the cookie content can use it to impersonate its true owner. The `'cookie`' s
 - `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as expired in the response and cleared. Defaults to `false`.
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
-- `redirectTo` - optional login URI to redirect unauthenticated requests to. Defaults to no redirection.
+- `redirectTo` - optional login URI to redirect unauthenticated requests to. Note that using `redirectTo` with authentication mode `'try'`
+  will cause the protected endpoint to always redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use
+  the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`). Defaults to no redirection.
 - `appendNext` - if `true` and `redirectTo` is `true`, appends the current request path to the query component of the `redirectTo` URI using the
   parameter name `'next'`. Set to a string to use a different parameter name. Defaults to `false`.
 - `validateFunc` - an optional session validation function used to validate the content of the session cookie on each request. Used to verify that the
@@ -61,7 +63,7 @@ var home = function (request, reply) {
 var login = function (request, reply) {
 
     if (request.auth.isAuthenticated) {
-        return reply().redirect('/');
+        return reply.redirect('/');
     }
 
     var message = '';
@@ -96,13 +98,13 @@ var login = function (request, reply) {
     }
 
     request.auth.session.set(account);
-    return reply().redirect('/');
+    return reply.redirect('/');
 };
 
 var logout = function (request, reply) {
 
     request.auth.session.clear();
-    return reply().redirect('/');
+    return reply.redirect('/');
 };
 
 var server = new Hapi.Server('localhost', 8000);
@@ -117,9 +119,37 @@ server.pack.require('hapi-auth-cookie', function (err) {
     });
 
     server.route([
-        { method: 'GET', path: '/', config: { handler: home, auth: true } },
-        { method: ['GET', 'POST'], path: '/login', config: { handler: login, auth: { mode: 'try' } } },
-        { method: 'GET', path: '/logout', config: { handler: logout, auth: true } }
+        {
+            method: 'GET',
+            path: '/',
+            config: {
+                handler: home,
+                auth: 'session'
+            }
+        },
+        {
+            method: ['GET', 'POST'],
+            path: '/login',
+            config: {
+                handler: login,
+                auth: {
+                    mode: 'try'
+                },
+                plugins: {
+                    'hapi-auth-cookie': {
+                        redirectTo: false
+                    }
+                }
+            }
+        },
+        {
+            method: 'GET',
+            path: '/logout',
+            config: {
+                handler: logout,
+                auth: 'session'
+            }
+        }
     ]);
 
     server.start();
