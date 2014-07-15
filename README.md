@@ -109,7 +109,7 @@ var logout = function (request, reply) {
 
 var server = new Hapi.Server('localhost', 8000);
 
-server.pack.require('hapi-auth-cookie', function (err) {
+server.pack.register(require('hapi-auth-cookie'), function (err) {
 
     server.auth.strategy('session', 'cookie', {
         password: 'secret',
