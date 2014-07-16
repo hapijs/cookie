@@ -23,6 +23,8 @@ of the cookie content can use it to impersonate its true owner. The `'cookie`' s
   the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`). Defaults to no redirection.
 - `appendNext` - if `true` and `redirectTo` is `true`, appends the current request path to the query component of the `redirectTo` URI using the
   parameter name `'next'`. Set to a string to use a different parameter name. Defaults to `false`.
+- `redirectOnTry` - if `false` and route authentication mode is `'try'`, authentication errors will not trigger a redirection. Requires **hapi**
+  version 6.2.0 or newer. Defaults to `true`;
 - `validateFunc` - an optional session validation function used to validate the content of the session cookie on each request. Used to verify that the
   internal session state is still valid (e.g. user account still exists). The function has the signature `function(session, callback)` where:
     - `session` - is the session object set via `request.auth.session.set()`.

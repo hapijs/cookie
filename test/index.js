@@ -193,7 +193,7 @@ describe('Cookie', function () {
         });
     });
 
-    it('authenticates a request', function (done) {
+    it('logs in and authenticates a request', function (done) {
 
         var server = new Hapi.Server();
         server.pack.register(require('../'), function (err) {
@@ -503,6 +503,39 @@ describe('Cookie', function () {
                 server.inject('/', function (res) {
 
                     expect(res.statusCode).to.equal(401);
+                    done();
+                });
+            });
+        });
+
+        it('skips when redirectOnTry is false in try mode', function (done) {
+
+            var server = new Hapi.Server();
+            server.pack.register(require('../'), function (err) {
+
+                expect(err).to.not.exist;
+
+                server.auth.strategy('default', 'cookie', 'try', {
+                    password: 'password',
+                    ttl: 60 * 1000,
+                    redirectOnTry: false,
+                    redirectTo: 'http://example.com/login',
+                    appendNext: true
+                });
+
+                server.route({
+                    method: 'GET',
+                    path: '/',
+                    handler: function (request, reply) {
+
+                        return reply(request.auth.isAuthenticated);
+                    }
+                });
+
+                server.inject('/', function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.result).to.equal(false);
                     done();
                 });
             });
