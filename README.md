@@ -135,7 +135,8 @@ server.pack.register(require('hapi-auth-cookie'), function (err) {
             config: {
                 handler: login,
                 auth: {
-                    mode: 'try'
+                    mode: 'try',
+                    strategy: 'session'
                 },
                 plugins: {
                     'hapi-auth-cookie': {
