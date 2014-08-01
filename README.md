@@ -5,6 +5,8 @@
 
 [![Build Status](https://secure.travis-ci.org/spumko/hapi-auth-cookie.png)](http://travis-ci.org/spumko/hapi-auth-cookie)
 
+Lead Maintainer: [Bian Tan](https://github.com/biant)
+
 Cookie authentication provides a simple cookie-based session management. The user has to be authenticated via other means, typically a web
 form, and upon successful authentication, receive a reply with a session cookie. Subsequent requests containing the session cookie are authenticated
 (the cookie uses [Iron](https://github.com/hueniverse/iron) to encrypt and sign the session content) and validated via the provided `validateFunc`
