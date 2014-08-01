@@ -1,9 +1,9 @@
-<a href="https://github.com/spumko"><img src="https://raw.github.com/spumko/spumko/master/images/from.png" align="right" /></a>
+<a href="https://github.com/hapijs"><img src="https://raw.github.com/hapijs/spumko/master/images/from.png" align="right" /></a>
 ### hapi-auth-cookie
 
-[**hapi**](https://github.com/spumko/hapi) Cookie authentication plugin
+[**hapi**](https://github.com/hapijs/hapi) Cookie authentication plugin
 
-[![Build Status](https://secure.travis-ci.org/spumko/hapi-auth-cookie.png)](http://travis-ci.org/spumko/hapi-auth-cookie)
+[![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-cookie.png)](http://travis-ci.org/hapijs/hapi-auth-cookie)
 
 Lead Maintainer: [Bian Tan](https://github.com/biant)
 
