@@ -1,4 +1,3 @@
-<a href="https://github.com/hapijs"><img src="https://raw.github.com/hapijs/spumko/master/images/from.png" align="right" /></a>
 ### hapi-auth-cookie
 
 [**hapi**](https://github.com/hapijs/hapi) Cookie authentication plugin
