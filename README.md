@@ -16,6 +16,7 @@ of the cookie content can use it to impersonate its true owner. The `'cookie`' s
 - `password` - used for Iron cookie encoding.
 - `ttl` - sets the cookie expires time in milliseconds. Defaults to single browser session (ends when browser closes).
 - `domain` - sets the cookie Domain value. Defaults to none.
+- `path` - sets the cookie path value. Defaults to `/`.
 - `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as expired in the response and cleared. Defaults to `false`.
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
