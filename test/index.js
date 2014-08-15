@@ -354,6 +354,7 @@ describe('Cookie', function () {
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
+                path: '/example-path',
                 clearInvalid: true,
                 validateFunc: function (session, callback) {
 
