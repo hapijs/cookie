@@ -354,6 +354,7 @@ describe('Cookie', function () {
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
+                path: '/example-path',
                 clearInvalid: true,
                 validateFunc: function (session, callback) {
 
@@ -389,6 +390,64 @@ describe('Cookie', function () {
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.result).to.equal('resource');
+                    done();
+                });
+            });
+        });
+    });
+
+    it('authenticates a request (no session override) on a sub-path', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                cookie: 'special',
+                path: '/subpath',
+                clearInvalid: true,
+                validateFunc: function (session, callback) {
+
+                    return callback(null, session.user === 'valid');
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/subpath/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/subpath/resource', handler: function (request, reply) {
+
+                    return reply('resource');
+                }
+            });
+
+            server.inject('/subpath/login/valid', function (res) {
+
+                expect(res.result).to.equal('valid');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                expect(header[0]).to.contain('Path=/subpath');
+
+                server.inject({ method: 'GET', url: '/subpath/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
                     expect(res.result).to.equal('resource');
