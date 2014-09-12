@@ -689,4 +689,56 @@ describe('Cookie', function () {
             });
         });
     });
+
+    describe('multiple strategies', function() {
+        before(function(done) {
+            var extraSchemePlugin = {
+                name: 'simpleTestAuth',
+                register: function(plugin, options, next) {
+
+                    var simpleTestSchema = function() {
+                        return {
+                            authenticate  : function(request, reply) {
+                                    reply(null, { credentials: { test: 'valid' } });
+                                }
+                        };
+                    };
+
+                    plugin.auth.scheme('simpleTest', simpleTestSchema);
+                    next();
+                }
+            };
+
+            server.pack.register(extraSchemePlugin, function(err) {
+                expect(err).to.not.exist;
+
+                server.auth.strategy('simple', 'simpleTest');
+
+                server.route({
+                    method: 'GET',
+                    path: '/multiple',
+                    config: {
+                        auth: {
+                            mode: 'try',
+                            strategies: ['default', 'simple'],
+                        },
+                        handler: function(request, reply) {
+                            var credentialsTest = (request.auth.credentials && request.auth.credentials.test) ||
+                                                  'NOT AUTH';
+                            return reply('multiple ' + credentialsTest);
+                        }
+                    }
+                });
+                done();
+            });
+        });
+
+        it('authenticates with the second strategy, if the first fails', function(done) {
+            server.inject('/multiple', function(res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.result).to.equal('multiple valid');
+                done();
+            });
+        });
+    });
 });
