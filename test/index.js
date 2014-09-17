@@ -497,6 +497,286 @@ describe('Cookie', function () {
         });
     });
 
+    it('errors on null or undefined key in setKey()', function (done) {
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/setKey', handler: function (request, reply) {
+                    try {
+                        request.auth.session.setKey();
+                    }
+                    catch (err) {
+                        done();
+                    }
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+                var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                expect(res.result).to.equal('steve');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(pattern);
+
+                server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                });
+            });
+        });
+    });
+
+    it('sets cookie value with a valid key using setKey()', function (done) {
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/setKey', handler: function (request, reply) {
+                    request.auth.session.setKey('key','value');
+                    done();
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+                var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                expect(res.result).to.equal('steve');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(pattern);
+
+                server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                });
+            });
+        });
+    });
+
+    it('errors on missing session in setKey()', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        try {
+                            request.auth.session.setKey('key', 'value');
+                        }
+                        catch (err) {
+                            return reply(err.message);
+                        }
+
+                        return reply('ok');
+                    }
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+
+                expect(res.result).to.equal('Invalid session');
+                done();
+            });
+        });
+    });
+
+    it('errors on missing session in clearKey()', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        try {
+                            request.auth.session.clearKey('key');
+                        }
+                        catch (err) {
+                            return reply(err.message);
+                        }
+
+                        return reply('ok');
+                    }
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+
+                expect(res.result).to.equal('Invalid session');
+                done();
+            });
+        });
+    });
+
+    it('errors on null or undefined key in clearKey()', function (done) {
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/clearKey', handler: function (request, reply) {
+                    try {
+                        request.auth.session.clearKey();
+                    }
+                    catch (err) {
+                        done();
+                    }
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+                var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                expect(res.result).to.equal('steve');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(pattern);
+
+                server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                });
+            });
+        });
+    });
+
+    it('deletes cookie value with a valid key using clearKey()', function (done) {
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist;
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/clearKey', handler: function (request, reply) {
+                    request.auth.session.clearKey('key');
+                    done();
+                }
+            });
+
+            server.inject('/login/steve', function (res) {
+                var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                expect(res.result).to.equal('steve');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(pattern);
+
+                server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                    expect(res.statusCode).to.equal(200);
+                });
+            });
+        });
+    });
+
     describe('redirection', function (done) {
 
         it('sends to login page (uri without query)', function (done) {
