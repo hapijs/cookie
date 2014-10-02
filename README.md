@@ -35,6 +35,8 @@ of the cookie content can use it to impersonate its true owner. The `'cookie`' s
         - `isValid` - `true` if the content of the session is valid, otherwise `false`.
         - `credentials` - a credentials object passed back to the application in `request.auth.credentials`. If value is `null` or `undefined`,
           defaults to `session`. If set, will override the current cookie as if `request.auth.session.set()` was called.
+- `rememberMeFor` - sets the cookie expiration time in milliseconds if `rememberMe` property is included in the session object.
+- `updateCookieOnValidate` - will update the ttl expiration every time a route is called with cookie authentication, with or without `validateFunc` set. Defaults to `false`.
 
 When the cookie scheme is enabled on a route, the `request.auth.session` objects is decorated with two methods:
 
