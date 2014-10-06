@@ -2,7 +2,6 @@
   "name": "hapi-auth-cookie",
   "description": "Cookie authentication plugin",
   "version": "1.3.2",
-  "author": "Eran Hammer <eran@hammer.io> (http://hueniverse.com)",
   "repository": "git://github.com/hapijs/hapi-auth-cookie",
   "main": "index",
   "keywords": [
