@@ -23,6 +23,8 @@ takes the following required options:
 - `path` - sets the cookie path value. Defaults to `/`.
 - `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as
   expired in the response and cleared. Defaults to `false`.
+- `keepAlive` - if `true`, automatically sets the session cookie after validation to extend the
+  current session for a new `ttl` duration. Defaults to `false`.
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
   exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
@@ -62,6 +64,8 @@ the following methods:
 - `clear([key])` - clears the current session or session key where:
     - `key` - optional key string to remove a specific property of the session. If none provided,
       defaults to removing the entire session which is used to log the user out.
+- `ttl(msecs)` - sets the ttl of the current active session where:
+    - `msecs` - the new ttl in milliseconds.
 
 Because this scheme decorates the `request` object with session-specific methods, it cannot be
 registered more than once.
