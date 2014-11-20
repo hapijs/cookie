@@ -99,7 +99,7 @@ server.pack.register(require('../'), function (err) {
                     return callback(null, false);
                 }
 
-                return callback(null, true, cached.item.account)
+                return callback(null, true, cached.account)
             })
         }
     });
