@@ -79,7 +79,7 @@ server.connection({ port: 8000 });
 
 server.register(require('../'), function (err) {
 
-    var cache = server.cache('sessions', { expiresIn: 3 * 24 * 60 * 60 * 1000 });
+    var cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;
 
     server.auth.strategy('session', 'cookie', true, {
