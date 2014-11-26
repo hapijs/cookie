@@ -1,6 +1,5 @@
 var Hapi = require('hapi');
 
-
 var uuid = 1;       // Use seq instead of proper unique identifiers for demo only
 
 var users = {
@@ -76,7 +75,7 @@ var logout = function (request, reply) {
 };
 
 var server = new Hapi.Server();
-server.connect({ port: 8000 });
+server.connection({ port: 8000 });
 
 server.register(require('../'), function (err) {
 
