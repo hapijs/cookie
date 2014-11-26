@@ -75,9 +75,10 @@ var logout = function (request, reply) {
     return reply.redirect('/');
 };
 
-var server = new Hapi.Server(8000);
+var server = new Hapi.Server();
+server.connect({ port: 8000 });
 
-server.pack.register(require('../'), function (err) {
+server.register(require('../'), function (err) {
 
     var cache = server.cache('sessions', { expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;

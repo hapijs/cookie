@@ -24,7 +24,8 @@ describe('scheme', function () {
     it('authenticates a request', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -84,27 +85,29 @@ describe('scheme', function () {
 
     it('fails over to another strategy if not present', function (done) {
 
-        var extraSchemePlugin = {
-            name: 'simpleTestAuth',
-            register: function (plugin, options, next) {
+        var extraSchemePlugin = function (plugin, options, next) {
 
-                var simpleTestSchema = function () {
+            var simpleTestSchema = function () {
 
-                    return {
-                        authenticate: function (request, reply) {
+                return {
+                    authenticate: function (request, reply) {
 
-                            return reply(null, { credentials: { test: 'valid' } });
-                        }
-                    };
+                        return reply.continue({ credentials: { test: 'valid' } });
+                    }
                 };
+            };
 
-                plugin.auth.scheme('simpleTest', simpleTestSchema);
-                return next();
-            }
+            plugin.auth.scheme('simpleTest', simpleTestSchema);
+            return next();
+        };
+
+        extraSchemePlugin.attributes = {
+            name: 'simpleTestAuth'
         };
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -135,7 +138,7 @@ describe('scheme', function () {
                 }
             });
 
-            server.pack.register(extraSchemePlugin, function (err) {
+            server.register(extraSchemePlugin, function (err) {
 
                 expect(err).to.not.exist();
 
@@ -170,7 +173,8 @@ describe('scheme', function () {
     it('ends a session', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -231,7 +235,8 @@ describe('scheme', function () {
     it('fails a request with invalid session', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -291,7 +296,8 @@ describe('scheme', function () {
     it('does not clear a request with invalid session (clearInvalid not set)', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -350,7 +356,8 @@ describe('scheme', function () {
     it('logs in and authenticates a request', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -402,7 +409,8 @@ describe('scheme', function () {
     it('errors in validation function', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -454,7 +462,8 @@ describe('scheme', function () {
     it('authenticates a request (no ttl)', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -499,7 +508,8 @@ describe('scheme', function () {
     it('authenticates a request (no session override)', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -556,7 +566,8 @@ describe('scheme', function () {
     it('authenticates a request (no session override) on a sub-path', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -614,7 +625,8 @@ describe('scheme', function () {
     it('extends ttl automatically', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -668,7 +680,8 @@ describe('scheme', function () {
     it('extends ttl automatically (validateFunc)', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -735,7 +748,8 @@ describe('scheme', function () {
         it('errors on missing session in set()', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -775,7 +789,8 @@ describe('scheme', function () {
         it('sets individual cookie key', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -824,7 +839,8 @@ describe('scheme', function () {
         it('throws on missing session when trying to set key', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -864,7 +880,8 @@ describe('scheme', function () {
         it('throws when trying to set key with invalid input', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -904,7 +921,8 @@ describe('scheme', function () {
         it('throws when trying to set key with null key', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -947,7 +965,8 @@ describe('scheme', function () {
         it('clear a specific session key', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -996,7 +1015,8 @@ describe('scheme', function () {
         it('throws when trying to clear a key on missing session', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1036,7 +1056,8 @@ describe('scheme', function () {
         it('throws when trying to clear a key with invalid input', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1076,7 +1097,8 @@ describe('scheme', function () {
         it('throws when trying to clear a key with null input', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1119,7 +1141,8 @@ describe('scheme', function () {
         it('overrides ttl', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1172,7 +1195,8 @@ describe('scheme', function () {
         it('sends to login page (uri without query)', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1202,7 +1226,8 @@ describe('scheme', function () {
         it('skips when route override', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1240,7 +1265,8 @@ describe('scheme', function () {
         it('skips when redirectOnTry is false in try mode', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1273,7 +1299,8 @@ describe('scheme', function () {
         it('sends to login page (uri with query)', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1303,7 +1330,8 @@ describe('scheme', function () {
         it('sends to login page and does not append the next query when appendNext is false', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1333,7 +1361,8 @@ describe('scheme', function () {
         it('redirect on try', function (done) {
 
             var server = new Hapi.Server();
-            server.pack.register(require('../'), function (err) {
+            server.connection();
+            server.register(require('../'), function (err) {
 
                 expect(err).to.not.exist();
 
@@ -1363,7 +1392,8 @@ describe('scheme', function () {
     it('clear cookie on invalid', function (done) {
 
         var server = new Hapi.Server();
-        server.pack.register(require('../'), function (err) {
+        server.connection();
+        server.register(require('../'), function (err) {
 
             expect(err).to.not.exist();
 
@@ -1377,7 +1407,7 @@ describe('scheme', function () {
 
             server.inject({ url: '/', headers: { cookie: 'sid=123456' } }, function (res) {
 
-                expect(res.statusCode).to.equal(400);
+                expect(res.statusCode).to.equal(401);
                 expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Path=/');
                 done();
             });
