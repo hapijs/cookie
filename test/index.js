@@ -1360,7 +1360,7 @@ describe('scheme', function () {
         });
     });
 
-    it('clear cookie on invalid', function (done) {
+    it('clears cookie on invalid', function (done) {
 
         var server = new Hapi.Server();
         server.pack.register(require('../'), function (err) {
@@ -1410,60 +1410,168 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-                // kill the server, and create a new one, then use the saved cookie
-                // and see if it gets unset
-                server.stop(function(){
+                // Kill the server, and create a new one, then use the saved cookie and see if it gets unset
 
-                var server2 = new Hapi.Server();
-                server2.pack.register(require('../'), function (err) {
+                server.stop(function () {
 
-                    server2.auth.strategy('default', 'cookie', true, {
-                        password: 'password2',
-                        ttl: 60 * 1000,
-                        domain: 'example.com',
-                        cookie: 'special',
-                        clearInvalid: true,
-                        validateFunc: function (session, callback) {
+                    var server2 = new Hapi.Server();
+                    server2.pack.register(require('../'), function (err) {
 
-                            var override = Hoek.clone(session);
-                            override.something = 'new';
+                        server2.auth.strategy('default', 'cookie', true, {
+                            password: 'password2',
+                            ttl: 60 * 1000,
+                            domain: 'example.com',
+                            cookie: 'special',
+                            clearInvalid: true,
+                            validateFunc: function (session, callback) {
 
-                            return callback(null, session.user === 'valid', override);
-                        }
-                    });
+                                var override = Hoek.clone(session);
+                                override.something = 'new';
 
-                    server2.route({
-                        method: 'GET', path: '/login/{user}',
-                        config: {
-                            auth: { mode: 'try' },
-                            handler: function (request, reply) {
-
-                                request.auth.session.set({ user: request.params.user });
-                                return reply(request.params.user);
+                                return callback(null, session.user === 'valid', override);
                             }
-                        }
-                    });
+                        });
 
-                    server2.route({
-                        method: 'GET', path: '/resource', handler: function (request, reply) {
+                        server2.route({
+                            method: 'GET', path: '/login/{user}',
+                            config: {
+                                auth: { mode: 'try' },
+                                handler: function (request, reply) {
 
-                            expect(request.auth.credentials.something).to.equal('new');
-                            return reply('resource');
-                        }
-                    });
+                                    request.auth.session.set({ user: request.params.user });
+                                    return reply(request.params.user);
+                                }
+                            }
+                        });
 
-                    server2.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function(res) {
+                        server2.route({
+                            method: 'GET', path: '/resource', handler: function (request, reply) {
 
-                        expect(JSON.stringify(res.result)).to.equal('{"statusCode":400,"error":"Bad Request","message":"Bad cookie value: special"}');
-                        var header = res.headers['set-cookie'];
-                        expect(header.length).to.equal(1);
-                        expect(header[0]).to.contain('Max-Age=0');
-                        expect(header[0]).to.contain('Expires=');
-                        expect(header[0]).to.contain('special=;');
+                                expect(request.auth.credentials.something).to.equal('new');
+                                return reply('resource');
+                            }
+                        });
 
-                        done();
+                        server2.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                            var header = res.headers['set-cookie'];
+                            expect(header.length).to.equal(1);
+                            expect(header[0]).to.contain('Max-Age=0');
+                            expect(header[0]).to.contain('Expires=');
+                            expect(header[0]).to.contain('special=;');
+                            expect(res.statusCode).to.equal(401);
+                            done();
+                        });
                     });
                 });
+            });
+        });
+    });
+
+    it('clears cookie on invalid (redirects)', function (done) {
+
+        var server = new Hapi.Server();
+        server.pack.register(require('../'), function (err) {
+
+            expect(err).to.not.exist();
+
+            server.auth.strategy('default', 'cookie', true, {
+                password: 'password1',
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                cookie: 'special',
+                clearInvalid: true,
+                validateFunc: function (session, callback) {
+
+                    var override = Hoek.clone(session);
+                    override.something = 'new';
+
+                    return callback(null, session.user === 'valid', override);
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, reply) {
+
+                        request.auth.session.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/resource', handler: function (request, reply) {
+
+                    expect(request.auth.credentials.something).to.equal('new');
+                    return reply('resource');
+                }
+            });
+
+            server.inject('/login/valid', function (res) {
+
+                expect(res.result).to.equal('valid');
+                var header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+
+                // Kill the server, and create a new one, then use the saved cookie and see if it gets unset
+
+                server.stop(function () {
+
+                    var server2 = new Hapi.Server();
+                    server2.pack.register(require('../'), function (err) {
+
+                        server2.auth.strategy('default', 'cookie', true, {
+                            password: 'password2',
+                            ttl: 60 * 1000,
+                            domain: 'example.com',
+                            cookie: 'special',
+                            clearInvalid: true,
+                            redirectTo: 'http://example.com/door',
+                            validateFunc: function (session, callback) {
+
+                                var override = Hoek.clone(session);
+                                override.something = 'new';
+
+                                return callback(null, session.user === 'valid', override);
+                            }
+                        });
+
+                        server2.route({
+                            method: 'GET', path: '/login/{user}',
+                            config: {
+                                auth: { mode: 'try' },
+                                handler: function (request, reply) {
+
+                                    request.auth.session.set({ user: request.params.user });
+                                    return reply(request.params.user);
+                                }
+                            }
+                        });
+
+                        server2.route({
+                            method: 'GET', path: '/resource', handler: function (request, reply) {
+
+                                expect(request.auth.credentials.something).to.equal('new');
+                                return reply('resource');
+                            }
+                        });
+
+                        server2.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+
+                            var header = res.headers['set-cookie'];
+                            expect(header.length).to.equal(1);
+                            expect(header[0]).to.contain('Max-Age=0');
+                            expect(header[0]).to.contain('Expires=');
+                            expect(header[0]).to.contain('special=;');
+                            expect(res.statusCode).to.equal(302);
+                            done();
+                        });
+                    });
                 });
             });
         });
