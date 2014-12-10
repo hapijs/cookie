@@ -137,9 +137,10 @@ var logout = function (request, reply) {
     return reply.redirect('/');
 };
 
-var server = new Hapi.Server('localhost', 8000);
+var server = new Hapi.Server();
+server.connection({ port: 8000 });
 
-server.pack.register(require('hapi-auth-cookie'), function (err) {
+server.register(require('hapi-auth-cookie'), function (err) {
 
     server.auth.strategy('session', 'cookie', {
         password: 'secret',
@@ -147,43 +148,43 @@ server.pack.register(require('hapi-auth-cookie'), function (err) {
         redirectTo: '/login',
         isSecure: false
     });
+});
 
-    server.route([
-        {
-            method: 'GET',
-            path: '/',
-            config: {
-                handler: home,
-                auth: 'session'
-            }
-        },
-        {
-            method: ['GET', 'POST'],
-            path: '/login',
-            config: {
-                handler: login,
-                auth: {
-                    mode: 'try',
-                    strategy: 'session'
-                },
-                plugins: {
-                    'hapi-auth-cookie': {
-                        redirectTo: false
-                    }
+server.route([
+    {
+        method: 'GET',
+        path: '/',
+        config: {
+            handler: home,
+            auth: 'session'
+        }
+    },
+    {
+        method: ['GET', 'POST'],
+        path: '/login',
+        config: {
+            handler: login,
+            auth: {
+                mode: 'try',
+                strategy: 'session'
+            },
+            plugins: {
+                'hapi-auth-cookie': {
+                    redirectTo: false
                 }
             }
-        },
-        {
-            method: 'GET',
-            path: '/logout',
-            config: {
-                handler: logout,
-                auth: 'session'
-            }
         }
-    ]);
+    },
+    {
+        method: 'GET',
+        path: '/logout',
+        config: {
+            handler: logout,
+            auth: 'session'
+        }
+    }
+]);
 
-    server.start();
-});
+server.start();
 ```
 
