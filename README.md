@@ -138,7 +138,7 @@ var logout = function (request, reply) {
 };
 
 var server = new Hapi.Server();
-server.connection();
+server.connection({ port: 8000 });
 
 server.register(require('hapi-auth-cookie'), function (err) {
 
