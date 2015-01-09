@@ -1,5 +1,7 @@
 ### hapi-auth-cookie
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hapijs/hapi-auth-cookie?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [**hapi**](https://github.com/hapijs/hapi) Cookie authentication plugin
 
 [![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-cookie.png)](http://travis-ci.org/hapijs/hapi-auth-cookie)
