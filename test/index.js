@@ -27,8 +27,8 @@ describe('scheme', function () {
         server.register(require('../'), function(err) {
             expect(err).to.not.exist();
 
-            expect( function () { 
-                server.auth.strategy('default', 'cookie', true, {}) 
+            expect( function () {
+                server.auth.strategy('default', 'cookie', true, {});
             } ).to.throw(Error);
 
             done();
@@ -42,10 +42,10 @@ describe('scheme', function () {
         server.register(require('../'), function(err) {
             expect(err).to.not.exist();
 
-            expect( function () { 
+            expect( function () {
                 server.auth.strategy('default', 'cookie', true, {
                     password: 'password'
-                }) 
+                });
             } ).to.not.throw();
 
             done();
@@ -59,10 +59,10 @@ describe('scheme', function () {
         server.register(require('../'), function(err) {
             expect(err).to.not.exist();
 
-            expect( function () { 
+            expect( function () {
                 server.auth.strategy('default', 'cookie', true, {
                     validateFunc: 'not a function'
-                }) 
+                });
             } ).to.throw(Error);
 
             done();
@@ -76,11 +76,11 @@ describe('scheme', function () {
         server.register(require('../'), function(err) {
             expect(err).to.not.exist();
 
-            expect( function () { 
+            expect( function () {
                 server.auth.strategy('default', 'cookie', true, {
                     password: 'password',
                     keepAlive: true
-                }) 
+                });
             } ).to.throw(Error);
 
             done();
