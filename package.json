@@ -1,7 +1,7 @@
 {
   "name": "hapi-auth-cookie",
   "description": "Cookie authentication plugin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "repository": "git://github.com/hapijs/hapi-auth-cookie",
   "main": "index",
   "keywords": [
