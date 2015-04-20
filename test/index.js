@@ -20,6 +20,72 @@ var expect = Code.expect;
 
 
 describe('scheme', function () {
+    it('fails with no plugin options', function (done) {
+
+        var server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), function(err) {
+            expect(err).to.not.exist();
+
+            expect( function () {
+                server.auth.strategy('default', 'cookie', true, {});
+            } ).to.throw(Error);
+
+            done();
+        });
+    });
+
+    it('passes with a password configured', function (done) {
+
+        var server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), function(err) {
+            expect(err).to.not.exist();
+
+            expect( function () {
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password'
+                });
+            } ).to.not.throw();
+
+            done();
+        });
+    });
+
+    it('fails if validateFunc is not a function', function (done) {
+
+        var server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), function(err) {
+            expect(err).to.not.exist();
+
+            expect( function () {
+                server.auth.strategy('default', 'cookie', true, {
+                    validateFunc: 'not a function'
+                });
+            } ).to.throw(Error);
+
+            done();
+        });
+    });
+
+    it('fails if keepAlive is configured but not ttl', function (done) {
+
+        var server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), function(err) {
+            expect(err).to.not.exist();
+
+            expect( function () {
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password',
+                    keepAlive: true
+                });
+            } ).to.throw(Error);
+
+            done();
+        });
+    });
 
     it('authenticates a request', function (done) {
 
