@@ -1291,7 +1291,6 @@ describe('scheme', function () {
 
         it('skips when redirectTo is set to false', function (done) {
 
-
             var server = new Hapi.Server();
             server.connection();
             server.register(require('../'), function (err) {
