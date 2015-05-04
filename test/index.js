@@ -1456,6 +1456,37 @@ describe('scheme', function () {
             });
         });
 
+        it('appends the custom query when appendNext is string', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection();
+            server.register(require('../'), function (err) {
+
+                expect(err).to.not.exist();
+
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password',
+                    ttl: 60 * 1000,
+                    redirectTo: 'http://example.com/login?mode=1',
+                    appendNext: 'done'
+                });
+
+                server.route({
+                    method: 'GET', path: '/', handler: function (request, reply) {
+
+                        return reply('never');
+                    }
+                });
+
+                server.inject('/', function (res) {
+
+                    expect(res.statusCode).to.equal(302);
+                    expect(res.headers.location).to.equal('http://example.com/login?mode=1&done=%2F');
+                    done();
+                });
+            });
+        });
+
         it('redirect on try', function (done) {
 
             var server = new Hapi.Server();
