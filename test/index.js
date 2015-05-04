@@ -1289,6 +1289,38 @@ describe('scheme', function () {
             });
         });
 
+        it('skips when redirectTo is set to false', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection();
+            server.register(require('../'), function (err) {
+
+                expect(err).to.not.exist();
+
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password',
+                    ttl: 60 * 1000,
+                    redirectTo: false,
+                    appendNext: true
+                });
+
+                server.route({
+                    method: 'GET',
+                    path: '/',
+                    handler: function (request, reply) {
+
+                        return reply('never');
+                    }
+                });
+
+                server.inject('/', function (res) {
+
+                    expect(res.statusCode).to.equal(401);
+                    done();
+                });
+            });
+        });
+
         it('skips when route override', function (done) {
 
             var server = new Hapi.Server();
