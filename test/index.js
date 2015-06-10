@@ -106,7 +106,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -188,7 +188,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -255,7 +255,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -317,7 +317,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -377,7 +377,7 @@ describe('scheme', function () {
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -490,7 +490,7 @@ describe('scheme', function () {
                 ttl: 60 * 1000,
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     return callback(new Error('boom'));
                 }
@@ -546,7 +546,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -594,7 +594,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 path: '/example-path',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     return callback(null, session.user === 'valid');
                 }
@@ -652,7 +652,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 path: '/subpath',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     return callback(null, session.user === 'valid');
                 }
@@ -766,7 +766,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 clearInvalid: true,
                 keepAlive: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
