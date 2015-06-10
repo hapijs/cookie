@@ -99,8 +99,8 @@ server.register(require('../'), function (err) {
                     return callback(null, false);
                 }
 
-                return callback(null, true, cached.account)
-            })
+                return callback(null, true, cached.account);
+            });
         }
     });
 
