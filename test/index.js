@@ -20,16 +20,19 @@ var expect = Code.expect;
 
 
 describe('scheme', function () {
+
     it('fails with no plugin options', function (done) {
 
         var server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function(err) {
+        server.register(require('../'), function (err) {
+
             expect(err).to.not.exist();
 
-            expect( function () {
+            expect(function () {
+
                 server.auth.strategy('default', 'cookie', true, {});
-            } ).to.throw(Error);
+            }).to.throw(Error);
 
             done();
         });
@@ -39,14 +42,14 @@ describe('scheme', function () {
 
         var server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function(err) {
+        server.register(require('../'), function (err) {
+
             expect(err).to.not.exist();
 
-            expect( function () {
-                server.auth.strategy('default', 'cookie', true, {
-                    password: 'password'
-                });
-            } ).to.not.throw();
+            expect(function () {
+
+                server.auth.strategy('default', 'cookie', true, { password: 'password' });
+            }).to.not.throw();
 
             done();
         });
@@ -56,14 +59,14 @@ describe('scheme', function () {
 
         var server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function(err) {
+        server.register(require('../'), function (err) {
+
             expect(err).to.not.exist();
 
-            expect( function () {
-                server.auth.strategy('default', 'cookie', true, {
-                    validateFunc: 'not a function'
-                });
-            } ).to.throw(Error);
+            expect(function () {
+
+                server.auth.strategy('default', 'cookie', true, { validateFunc: 'not a function' });
+            }).to.throw(Error);
 
             done();
         });
@@ -73,15 +76,17 @@ describe('scheme', function () {
 
         var server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function(err) {
+        server.register(require('../'), function (err) {
+
             expect(err).to.not.exist();
 
-            expect( function () {
+            expect(function () {
+
                 server.auth.strategy('default', 'cookie', true, {
                     password: 'password',
                     keepAlive: true
                 });
-            } ).to.throw(Error);
+            }).to.throw(Error);
 
             done();
         });
@@ -101,7 +106,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -183,7 +188,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -216,7 +221,7 @@ describe('scheme', function () {
                     config: {
                         auth: {
                             mode: 'try',
-                            strategies: ['default', 'simple'],
+                            strategies: ['default', 'simple']
                         },
                         handler: function (request, reply) {
 
@@ -250,7 +255,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -312,7 +317,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -372,7 +377,7 @@ describe('scheme', function () {
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -485,7 +490,10 @@ describe('scheme', function () {
                 ttl: 60 * 1000,
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) { return callback(new Error('boom')); }
+                validateFunc: function (request, session, callback) {
+
+                    return callback(new Error('boom'));
+                }
             });
 
             server.route({
@@ -538,7 +546,7 @@ describe('scheme', function () {
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -586,7 +594,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 path: '/example-path',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     return callback(null, session.user === 'valid');
                 }
@@ -644,7 +652,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 path: '/subpath',
                 clearInvalid: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     return callback(null, session.user === 'valid');
                 }
@@ -758,7 +766,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 clearInvalid: true,
                 keepAlive: true,
-                validateFunc: function (session, callback) {
+                validateFunc: function (request, session, callback) {
 
                     var override = Hoek.clone(session);
                     override.something = 'new';
@@ -835,8 +843,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.set();
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -881,12 +889,14 @@ describe('scheme', function () {
 
                 server.route({
                     method: 'GET', path: '/setKey', handler: function (request, reply) {
+
                         request.auth.session.set('key', 'value');
                         done();
                     }
                 });
 
                 server.inject('/login/steve', function (res) {
+
                     var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
                     expect(res.result).to.equal('steve');
                     var header = res.headers['set-cookie'];
@@ -926,8 +936,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.set('key', 'value');
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -967,8 +977,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.set({}, 'value');
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -1008,8 +1018,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.set(null, 'value');
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -1057,12 +1067,14 @@ describe('scheme', function () {
 
                 server.route({
                     method: 'GET', path: '/clearKey', handler: function (request, reply) {
+
                         request.auth.session.clear('key');
                         done();
                     }
                 });
 
                 server.inject('/login/steve', function (res) {
+
                     var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
                     expect(res.result).to.equal('steve');
                     var header = res.headers['set-cookie'];
@@ -1102,8 +1114,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.clear('key');
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -1143,8 +1155,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.clear({});
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -1184,8 +1196,8 @@ describe('scheme', function () {
                             try {
                                 request.auth.session.clear(null);
                             }
-                            catch (err) {
-                                return reply(err.message);
+                            catch (error) {
+                                return reply(error.message);
                             }
 
                             return reply('ok');
@@ -1234,12 +1246,14 @@ describe('scheme', function () {
 
                 server.route({
                     method: 'GET', path: '/ttl', handler: function (request, reply) {
+
                         request.auth.session.set('key', 'value');
                         done();
                     }
                 });
 
                 server.inject('/login/steve', function (res) {
+
                     var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
                     expect(res.result).to.equal('steve');
                     var header = res.headers['set-cookie'];
@@ -1532,7 +1546,12 @@ describe('scheme', function () {
                 clearInvalid: true
             });
 
-            server.route({ method: 'GET', path: '/', handler: function (request, reply) { return reply(); } });
+            server.route({
+                method: 'GET', path: '/', handler: function (request, reply) {
+
+                    return reply();
+                }
+            });
 
             server.inject({ url: '/', headers: { cookie: 'sid=123456' } }, function (res) {
 
