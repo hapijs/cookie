@@ -42,6 +42,7 @@ takes the following required options:
   session cookie on each request. Used to verify that the internal session state is still valid
   (e.g. user account still exists). The function has the signature `function(session, callback)`
   where:
+    - `request` - is the Hapi request object of the request which is being authenticated.
     - `session` - is the session object set via `request.auth.session.set()`.
     - `callback` - a callback function with the signature `function(err, isValid, credentials)`
       where:
@@ -187,4 +188,3 @@ server.route([
 
 server.start();
 ```
-
