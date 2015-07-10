@@ -143,6 +143,7 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
@@ -150,6 +151,7 @@ describe('scheme', function () {
                     expect(res.result).to.equal('resource');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -292,6 +294,7 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/logout', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
@@ -299,6 +302,7 @@ describe('scheme', function () {
                     expect(res.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -354,12 +358,14 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
                     expect(res.statusCode).to.equal(401);
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -414,12 +420,14 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.headers['set-cookie']).to.not.exist();
                     expect(res.statusCode).to.equal(401);
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -467,12 +475,14 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
                     expect(res.result).to.equal('resource');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -516,6 +526,7 @@ describe('scheme', function () {
                 }
             });
 
+            /* eslint-disable hapi/no-shadow-relaxed */
             server.inject('/login/steve', function (res) {
 
                 expect(res.result).to.equal('steve');
@@ -530,6 +541,7 @@ describe('scheme', function () {
                     done();
                 });
             });
+            /* eslint-enable hapi/no-shadow-relaxed */
         });
     });
 
@@ -627,12 +639,14 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
                     expect(res.result).to.equal('resource');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -686,12 +700,14 @@ describe('scheme', function () {
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
                 expect(header[0]).to.contain('Path=/subpath');
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/subpath/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
                     expect(res.result).to.equal('resource');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -739,6 +755,7 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
@@ -747,6 +764,7 @@ describe('scheme', function () {
                     expect(header[0]).to.contain('Max-Age=60');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -803,6 +821,7 @@ describe('scheme', function () {
                 expect(header[0]).to.contain('Max-Age=60');
                 var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
+                /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                     expect(res.statusCode).to.equal(200);
@@ -813,6 +832,7 @@ describe('scheme', function () {
                     expect(header[0]).to.contain('Max-Age=60');
                     done();
                 });
+                /* eslint-enable hapi/no-shadow-relaxed */
             });
         });
     });
@@ -904,10 +924,12 @@ describe('scheme', function () {
                     expect(header[0]).to.contain('Max-Age=60');
                     var cookie = header[0].match(pattern);
 
+                    /* eslint-disable hapi/no-shadow-relaxed */
                     server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                         expect(res.statusCode).to.equal(200);
                     });
+                    /* eslint-enable hapi/no-shadow-relaxed */
                 });
             });
         });
@@ -1082,10 +1104,12 @@ describe('scheme', function () {
                     expect(header[0]).to.contain('Max-Age=60');
                     var cookie = header[0].match(pattern);
 
+                    /* eslint-disable hapi/no-shadow-relaxed */
                     server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                         expect(res.statusCode).to.equal(200);
                     });
+                    /* eslint-enable hapi/no-shadow-relaxed */
                 });
             });
         });
@@ -1261,10 +1285,12 @@ describe('scheme', function () {
                     expect(header[0]).to.contain('Max-Age=60');
                     var cookie = header[0].match(pattern);
 
+                    /* eslint-disable hapi/no-shadow-relaxed */
                     server.inject({ method: 'GET', url: '/ttl', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
 
                         expect(res.statusCode).to.equal(200);
                     });
+                    /* eslint-enable hapi/no-shadow-relaxed */
                 });
             });
         });
