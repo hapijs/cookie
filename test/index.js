@@ -55,6 +55,23 @@ describe('scheme', function () {
         });
     });
 
+    it('passes with a password configured which is a Buffer', function (done) {
+
+        var server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), function (err) {
+
+            expect(err).to.not.exist();
+
+            expect(function () {
+
+                server.auth.strategy('default', 'cookie', true, { password: new Buffer('foobar') });
+            }).to.not.throw();
+
+            done();
+        });
+    });
+
     it('fails if validateFunc is not a function', function (done) {
 
         var server = new Hapi.Server();
