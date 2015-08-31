@@ -186,5 +186,11 @@ server.route([
     }
 ]);
 
-server.start();
+server.start(function (err) {
+
+    if (err) {
+        throw err;
+    }
+    console.log('Server started at: ' + server.info.uri);
+});
 ```
