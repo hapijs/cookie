@@ -87,7 +87,7 @@ server.register(require('../'), function (err) {
         cookie: 'sid-example',
         redirectTo: '/login',
         isSecure: false,
-        validateFunc: function (session, callback) {
+        validateFunc: function (request, session, callback) {
 
             cache.get(session.sid, function (err, cached) {
 
