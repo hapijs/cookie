@@ -72,9 +72,13 @@ Because this scheme decorates the `request` object with session-specific methods
 registered more than once.
 
 ```javascript
-var Hapi = require('hapi');
+'use strict';
 
-var users = {
+const Hapi = require('hapi');
+
+let uuid = 1;       // Use seq instead of proper unique identifiers for demo only
+
+const users = {
     john: {
         id: 'john',
         password: 'password',
@@ -82,7 +86,7 @@ var users = {
     }
 };
 
-var home = function (request, reply) {
+const home = function (request, reply) {
 
     reply('<html><head><title>Login page</title></head><body><h3>Welcome '
       + request.auth.credentials.name
@@ -91,14 +95,14 @@ var home = function (request, reply) {
       + '</form></body></html>');
 };
 
-var login = function (request, reply) {
+const login = function (request, reply) {
 
     if (request.auth.isAuthenticated) {
         return reply.redirect('/');
     }
 
-    var message = '';
-    var account = null;
+    let message = '';
+    let account = null;
 
     if (request.method === 'post') {
 
@@ -128,69 +132,67 @@ var login = function (request, reply) {
             + '<input type="submit" value="Login"></form></body></html>');
     }
 
-    request.auth.session.set(account);
-    return reply.redirect('/');
+    const sid = String(++uuid);
+    request.server.app.cache.set(sid, { account: account }, 0, (err) => {
+
+        if (err) {
+            reply(err);
+        }
+
+        request.auth.session.set({ sid: sid });
+        return reply.redirect('/');
+    });
 };
 
-var logout = function (request, reply) {
+const logout = function (request, reply) {
 
     request.auth.session.clear();
     return reply.redirect('/');
 };
 
-var server = new Hapi.Server();
+const server = new Hapi.Server();
 server.connection({ port: 8000 });
 
-server.register(require('hapi-auth-cookie'), function (err) {
-
-    server.auth.strategy('session', 'cookie', {
-        password: 'secret',
-        cookie: 'sid-example',
-        redirectTo: '/login',
-        isSecure: false
-    });
-});
-
-server.route([
-    {
-        method: 'GET',
-        path: '/',
-        config: {
-            handler: home,
-            auth: 'session'
-        }
-    },
-    {
-        method: ['GET', 'POST'],
-        path: '/login',
-        config: {
-            handler: login,
-            auth: {
-                mode: 'try',
-                strategy: 'session'
-            },
-            plugins: {
-                'hapi-auth-cookie': {
-                    redirectTo: false
-                }
-            }
-        }
-    },
-    {
-        method: 'GET',
-        path: '/logout',
-        config: {
-            handler: logout,
-            auth: 'session'
-        }
-    }
-]);
-
-server.start(function (err) {
+server.register(require('../'), (err) => {
 
     if (err) {
         throw err;
     }
-    console.log('Server started at: ' + server.info.uri);
+
+    const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
+    server.app.cache = cache;
+
+    server.auth.strategy('session', 'cookie', true, {
+        password: 'secret',
+        cookie: 'sid-example',
+        redirectTo: '/login',
+        isSecure: false,
+        validateFunc: function (request, session, callback) {
+
+            cache.get(session.sid, (err, cached) => {
+
+                if (err) {
+                    return callback(err, false);
+                }
+
+                if (!cached) {
+                    return callback(null, false);
+                }
+
+                return callback(null, true, cached.account);
+            });
+        }
+    });
+
+    server.route([
+        { method: 'GET', path: '/', config: { handler: home } },
+        { method: ['GET', 'POST'], path: '/login', config: { handler: login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
+        { method: 'GET', path: '/logout', config: { handler: logout } }
+    ]);
+
+    server.start(() => {
+
+        console.log('Server ready');
+    });
 });
 ```

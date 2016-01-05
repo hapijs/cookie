@@ -12,20 +12,20 @@
     "session"
   ],
   "engines": {
-    "node": ">=0.10.32"
+    "node": ">=4.x.x"
   },
   "dependencies": {
-    "boom": "2.x.x",
-    "hoek": "2.x.x",
-    "joi": "6.x.x"
+    "boom": "3.x.x",
+    "hoek": "3.x.x",
+    "joi": "7.x.x"
   },
   "peerDependencies": {
-    "hapi": ">=8.x.x"
+    "hapi": ">=10.x.x"
   },
   "devDependencies": {
-    "code": "1.x.x",
-    "hapi": "9.x.x",
-    "lab": "5.x.x"
+    "code": "2.x.x",
+    "hapi": "10.x.x",
+    "lab": "8.x.x"
   },
   "scripts": {
     "test": "lab -a code -t 100 -L",
