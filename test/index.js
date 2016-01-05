@@ -140,7 +140,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -224,7 +224,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -291,7 +291,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -300,7 +300,7 @@ describe('scheme', () => {
             server.route({
                 method: 'GET', path: '/logout', handler: function (request, reply) {
 
-                    request.auth.session.clear();
+                    request.cookieAuth.clear();
                     return reply('logged-out');
                 }
             });
@@ -355,7 +355,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -417,7 +417,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -472,7 +472,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -531,7 +531,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -592,7 +592,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -636,7 +636,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -696,7 +696,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -753,7 +753,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -817,7 +817,7 @@ describe('scheme', () => {
                     auth: { mode: 'try' },
                     handler: function (request, reply) {
 
-                        request.auth.session.set({ user: request.params.user });
+                        request.cookieAuth.set({ user: request.params.user });
                         return reply(request.params.user);
                     }
                 }
@@ -879,7 +879,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.set();
+                                request.cookieAuth.set();
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -919,7 +919,7 @@ describe('scheme', () => {
                         auth: { mode: 'try' },
                         handler: function (request, reply) {
 
-                            request.auth.session.set({ user: request.params.user });
+                            request.cookieAuth.set({ user: request.params.user });
                             return reply(request.params.user);
                         }
                     }
@@ -928,7 +928,7 @@ describe('scheme', () => {
                 server.route({
                     method: 'GET', path: '/setKey', handler: function (request, reply) {
 
-                        request.auth.session.set('key', 'value');
+                        request.cookieAuth.set('key', 'value');
                         done();
                     }
                 });
@@ -974,7 +974,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.set('key', 'value');
+                                request.cookieAuth.set('key', 'value');
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -1015,7 +1015,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.set({}, 'value');
+                                request.cookieAuth.set({}, 'value');
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -1056,7 +1056,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.set(null, 'value');
+                                request.cookieAuth.set(null, 'value');
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -1099,7 +1099,7 @@ describe('scheme', () => {
                         auth: { mode: 'try' },
                         handler: function (request, reply) {
 
-                            request.auth.session.set({ user: request.params.user });
+                            request.cookieAuth.set({ user: request.params.user });
                             return reply(request.params.user);
                         }
                     }
@@ -1108,7 +1108,7 @@ describe('scheme', () => {
                 server.route({
                     method: 'GET', path: '/clearKey', handler: function (request, reply) {
 
-                        request.auth.session.clear('key');
+                        request.cookieAuth.clear('key');
                         done();
                     }
                 });
@@ -1154,7 +1154,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.clear('key');
+                                request.cookieAuth.clear('key');
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -1195,7 +1195,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.clear({});
+                                request.cookieAuth.clear({});
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -1236,7 +1236,7 @@ describe('scheme', () => {
                         handler: function (request, reply) {
 
                             try {
-                                request.auth.session.clear(null);
+                                request.cookieAuth.clear(null);
                             }
                             catch (error) {
                                 return reply(error.message);
@@ -1279,8 +1279,8 @@ describe('scheme', () => {
                         auth: { mode: 'try' },
                         handler: function (request, reply) {
 
-                            request.auth.session.set({ user: request.params.user });
-                            request.auth.session.ttl(60 * 1000);
+                            request.cookieAuth.set({ user: request.params.user });
+                            request.cookieAuth.ttl(60 * 1000);
                             return reply(request.params.user);
                         }
                     }
@@ -1289,7 +1289,7 @@ describe('scheme', () => {
                 server.route({
                     method: 'GET', path: '/ttl', handler: function (request, reply) {
 
-                        request.auth.session.set('key', 'value');
+                        request.cookieAuth.set('key', 'value');
                         done();
                     }
                 });

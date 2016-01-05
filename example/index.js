@@ -65,14 +65,14 @@ const login = function (request, reply) {
             return reply(err);
         }
 
-        request.auth.session.set({ sid: sid });
+        request.cookieAuth.set({ sid: sid });
         return reply.redirect('/');
     });
 };
 
 const logout = function (request, reply) {
 
-    request.auth.session.clear();
+    request.cookieAuth.clear();
     return reply.redirect('/');
 };
 

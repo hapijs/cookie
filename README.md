@@ -43,16 +43,16 @@ takes the following required options:
   (e.g. user account still exists). The function has the signature `function(request, session, callback)`
   where:
     - `request` - is the Hapi request object of the request which is being authenticated.
-    - `session` - is the session object set via `request.auth.session.set()`.
+    - `session` - is the session object set via `request.cookieAuth.set()`.
     - `callback` - a callback function with the signature `function(err, isValid, credentials)`
       where:
         - `err` - an internal error.
         - `isValid` - `true` if the content of the session is valid, otherwise `false`.
         - `credentials` - a credentials object passed back to the application in
           `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
-          set, will override the current cookie as if `request.auth.session.set()` was called.
+          set, will override the current cookie as if `request.cookieAuth.set()` was called.
 
-When the cookie scheme is enabled on a route, the `request.auth.session` objects is decorated with
+When the cookie scheme is enabled on a route, the `request.cookieAuth` objects is decorated with
 the following methods:
 - `set(session)` - sets the current session. Must be called after a successful login to begin the
   session. `session` must be a non-null object, which is set on successful subsequent
@@ -139,14 +139,14 @@ const login = function (request, reply) {
             reply(err);
         }
 
-        request.auth.session.set({ sid: sid });
+        request.cookieAuth.set({ sid: sid });
         return reply.redirect('/');
     });
 };
 
 const logout = function (request, reply) {
 
-    request.auth.session.clear();
+    request.cookieAuth.clear();
     return reply.redirect('/');
 };
 
