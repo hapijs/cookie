@@ -1,8 +1,10 @@
-var Hapi = require('hapi');
+'use strict';
 
-var uuid = 1;       // Use seq instead of proper unique identifiers for demo only
+const Hapi = require('hapi');
 
-var users = {
+let uuid = 1;       // Use seq instead of proper unique identifiers for demo only
+
+const users = {
     john: {
         id: 'john',
         password: 'password',
@@ -10,7 +12,7 @@ var users = {
     }
 };
 
-var home = function (request, reply) {
+const home = function (request, reply) {
 
     reply('<html><head><title>Login page</title></head><body><h3>Welcome '
       + request.auth.credentials.name
@@ -19,14 +21,14 @@ var home = function (request, reply) {
       + '</form></body></html>');
 };
 
-var login = function (request, reply) {
+const login = function (request, reply) {
 
     if (request.auth.isAuthenticated) {
         return reply.redirect('/');
     }
 
-    var message = '';
-    var account = null;
+    let message = '';
+    let account = null;
 
     if (request.method === 'post') {
 
@@ -56,11 +58,11 @@ var login = function (request, reply) {
             + '<input type="submit" value="Login"></form></body></html>');
     }
 
-    var sid = String(++uuid);
-    request.server.app.cache.set(sid, { account: account }, 0, function (err) {
+    const sid = String(++uuid);
+    request.server.app.cache.set(sid, { account: account }, 0, (err) => {
 
         if (err) {
-            reply(err);
+            return reply(err);
         }
 
         request.auth.session.set({ sid: sid });
@@ -68,18 +70,22 @@ var login = function (request, reply) {
     });
 };
 
-var logout = function (request, reply) {
+const logout = function (request, reply) {
 
     request.auth.session.clear();
     return reply.redirect('/');
 };
 
-var server = new Hapi.Server();
+const server = new Hapi.Server();
 server.connection({ port: 8000 });
 
-server.register(require('../'), function (err) {
+server.register(require('../'), (err) => {
 
-    var cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
+    if (err) {
+        throw err;
+    }
+
+    const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;
 
     server.auth.strategy('session', 'cookie', true, {
@@ -89,7 +95,7 @@ server.register(require('../'), function (err) {
         isSecure: false,
         validateFunc: function (request, session, callback) {
 
-            cache.get(session.sid, function (err, cached) {
+            cache.get(session.sid, (err, cached) => {
 
                 if (err) {
                     return callback(err, false);
@@ -110,7 +116,7 @@ server.register(require('../'), function (err) {
         { method: 'GET', path: '/logout', config: { handler: logout } }
     ]);
 
-    server.start(function () {
+    server.start(() => {
 
         console.log('Server ready');
     });

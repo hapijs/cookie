@@ -1,35 +1,37 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Hapi = require('hapi');
-var Hoek = require('hoek');
-var Lab = require('lab');
+const Code = require('code');
+const Hapi = require('hapi');
+const Hoek = require('hoek');
+const Lab = require('lab');
 
 
 // Declare internals
 
-var internals = {};
+const internals = {};
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var describe = lab.describe;
-var it = lab.it;
-var expect = Code.expect;
+const lab = exports.lab = Lab.script();
+const describe = lab.describe;
+const it = lab.it;
+const expect = Code.expect;
 
 
-describe('scheme', function () {
+describe('scheme', () => {
 
-    it('fails with no plugin options', function (done) {
+    it('fails with no plugin options', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
-            expect(function () {
+            expect(() => {
 
                 server.auth.strategy('default', 'cookie', true, {});
             }).to.throw(Error);
@@ -38,15 +40,15 @@ describe('scheme', function () {
         });
     });
 
-    it('passes with a password configured', function (done) {
+    it('passes with a password configured', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
-            expect(function () {
+            expect(() => {
 
                 server.auth.strategy('default', 'cookie', true, { password: 'password' });
             }).to.not.throw();
@@ -55,15 +57,15 @@ describe('scheme', function () {
         });
     });
 
-    it('passes with a password configured which is a Buffer', function (done) {
+    it('passes with a password configured which is a Buffer', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
-            expect(function () {
+            expect(() => {
 
                 server.auth.strategy('default', 'cookie', true, { password: new Buffer('foobar') });
             }).to.not.throw();
@@ -72,15 +74,15 @@ describe('scheme', function () {
         });
     });
 
-    it('fails if validateFunc is not a function', function (done) {
+    it('fails if validateFunc is not a function', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
-            expect(function () {
+            expect(() => {
 
                 server.auth.strategy('default', 'cookie', true, { validateFunc: 'not a function' });
             }).to.throw(Error);
@@ -89,15 +91,15 @@ describe('scheme', function () {
         });
     });
 
-    it('fails if keepAlive is configured but not ttl', function (done) {
+    it('fails if keepAlive is configured but not ttl', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
-            expect(function () {
+            expect(() => {
 
                 server.auth.strategy('default', 'cookie', true, {
                     password: 'password',
@@ -109,11 +111,11 @@ describe('scheme', function () {
         });
     });
 
-    it('authenticates a request', function (done) {
+    it('authenticates a request', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -125,7 +127,7 @@ describe('scheme', function () {
                 clearInvalid: true,
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -152,20 +154,20 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/valid', function (res) {
+            server.inject('/login/valid', (res) => {
 
                 expect(res.result).to.equal('valid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.headers['set-cookie']).to.not.exist();
-                    expect(res.result).to.equal('resource');
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.headers['set-cookie']).to.not.exist();
+                    expect(res2.result).to.equal('resource');
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -173,11 +175,11 @@ describe('scheme', function () {
         });
     });
 
-    it('fails over to another strategy if not present', function (done) {
+    it('fails over to another strategy if not present', (done) => {
 
-        var extraSchemePlugin = function (plugin, options, next) {
+        const extraSchemePlugin = function (plugin, options, next) {
 
-            var simpleTestSchema = function () {
+            const simpleTestSchema = function () {
 
                 return {
                     authenticate: function (request, reply) {
@@ -195,9 +197,9 @@ describe('scheme', function () {
             name: 'simpleTestAuth'
         };
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -209,7 +211,7 @@ describe('scheme', function () {
                 clearInvalid: true,
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -228,7 +230,7 @@ describe('scheme', function () {
                 }
             });
 
-            server.register(extraSchemePlugin, function (err) {
+            server.register(extraSchemePlugin, (err) => {
 
                 expect(err).to.not.exist();
 
@@ -244,13 +246,13 @@ describe('scheme', function () {
                         },
                         handler: function (request, reply) {
 
-                            var credentialsTest = (request.auth.credentials && request.auth.credentials.test) || 'NOT AUTH';
+                            const credentialsTest = (request.auth.credentials && request.auth.credentials.test) || 'NOT AUTH';
                             return reply('multiple ' + credentialsTest);
                         }
                     }
                 });
 
-                server.inject('/multiple', function (res) {
+                server.inject('/multiple', (res) => {
 
                     expect(res.statusCode).to.equal(200);
                     expect(res.result).to.equal('multiple valid');
@@ -260,11 +262,11 @@ describe('scheme', function () {
         });
     });
 
-    it('ends a session', function (done) {
+    it('ends a session', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -276,7 +278,7 @@ describe('scheme', function () {
                 clearInvalid: true,
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -303,20 +305,20 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/valid', function (res) {
+            server.inject('/login/valid', (res) => {
 
                 expect(res.result).to.equal('valid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/logout', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/logout', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.result).to.equal('logged-out');
-                    expect(res.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.result).to.equal('logged-out');
+                    expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -324,11 +326,11 @@ describe('scheme', function () {
         });
     });
 
-    it('fails a request with invalid session', function (done) {
+    it('fails a request with invalid session', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -340,7 +342,7 @@ describe('scheme', function () {
                 clearInvalid: true,
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -367,19 +369,19 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/invalid', function (res) {
+            server.inject('/login/invalid', (res) => {
 
                 expect(res.result).to.equal('invalid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
-                    expect(res.statusCode).to.equal(401);
+                    expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
+                    expect(res2.statusCode).to.equal(401);
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -387,11 +389,11 @@ describe('scheme', function () {
         });
     });
 
-    it('does not clear a request with invalid session (clearInvalid not set)', function (done) {
+    it('does not clear a request with invalid session (clearInvalid not set)', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -402,7 +404,7 @@ describe('scheme', function () {
                 cookie: 'special',
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -429,19 +431,19 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/invalid', function (res) {
+            server.inject('/login/invalid', (res) => {
 
                 expect(res.result).to.equal('invalid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.headers['set-cookie']).to.not.exist();
-                    expect(res.statusCode).to.equal(401);
+                    expect(res2.headers['set-cookie']).to.not.exist();
+                    expect(res2.statusCode).to.equal(401);
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -449,11 +451,11 @@ describe('scheme', function () {
         });
     });
 
-    it('logs in and authenticates a request', function (done) {
+    it('logs in and authenticates a request', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -484,19 +486,19 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/steve', function (res) {
+            server.inject('/login/steve', (res) => {
 
                 expect(res.result).to.equal('steve');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.result).to.equal('resource');
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.result).to.equal('resource');
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -504,11 +506,11 @@ describe('scheme', function () {
         });
     });
 
-    it('errors in validation function', function (done) {
+    it('errors in validation function', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -544,17 +546,17 @@ describe('scheme', function () {
             });
 
             /* eslint-disable hapi/no-shadow-relaxed */
-            server.inject('/login/steve', function (res) {
+            server.inject('/login/steve', (res) => {
 
                 expect(res.result).to.equal('steve');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(401);
+                    expect(res2.statusCode).to.equal(401);
                     done();
                 });
             });
@@ -562,11 +564,11 @@ describe('scheme', function () {
         });
     });
 
-    it('authenticates a request (no ttl)', function (done) {
+    it('authenticates a request (no ttl)', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -577,7 +579,7 @@ describe('scheme', function () {
                 clearInvalid: true,
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -596,23 +598,22 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/valid', function (res) {
+            server.inject('/login/valid', (res) => {
 
                 expect(res.result).to.equal('valid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.not.contain('Max-Age');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
                 done();
             });
         });
     });
 
-    it('authenticates a request (no session override)', function (done) {
+    it('authenticates a request (no session override)', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -648,19 +649,19 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/valid', function (res) {
+            server.inject('/login/valid', (res) => {
 
                 expect(res.result).to.equal('valid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.result).to.equal('resource');
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.result).to.equal('resource');
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -668,11 +669,11 @@ describe('scheme', function () {
         });
     });
 
-    it('authenticates a request (no session override) on a sub-path', function (done) {
+    it('authenticates a request (no session override) on a sub-path', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -708,20 +709,20 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/subpath/login/valid', function (res) {
+            server.inject('/subpath/login/valid', (res) => {
 
                 expect(res.result).to.equal('valid');
-                var header = res.headers['set-cookie'];
+                const header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
                 expect(header[0]).to.contain('Path=/subpath');
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/subpath/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/subpath/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.result).to.equal('resource');
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.result).to.equal('resource');
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -729,11 +730,11 @@ describe('scheme', function () {
         });
     });
 
-    it('extends ttl automatically', function (done) {
+    it('extends ttl automatically', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -765,18 +766,18 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/valid', function (res) {
+            server.inject('/login/valid', (res) => {
 
-                var header = res.headers['set-cookie'];
+                let header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    var header = res.headers['set-cookie'];
+                    expect(res2.statusCode).to.equal(200);
+                    header = res2.headers['set-cookie'];
                     expect(header.length).to.equal(1);
                     expect(header[0]).to.contain('Max-Age=60');
                     done();
@@ -786,11 +787,11 @@ describe('scheme', function () {
         });
     });
 
-    it('extends ttl automatically (validateFunc)', function (done) {
+    it('extends ttl automatically (validateFunc)', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -803,7 +804,7 @@ describe('scheme', function () {
                 keepAlive: true,
                 validateFunc: function (request, session, callback) {
 
-                    var override = Hoek.clone(session);
+                    const override = Hoek.clone(session);
                     override.something = 'new';
 
                     return callback(null, session.user === 'valid', override);
@@ -830,21 +831,21 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject('/login/valid', function (res) {
+            server.inject('/login/valid', (res) => {
 
                 expect(res.result).to.equal('valid');
-                var header = res.headers['set-cookie'];
+                let header = res.headers['set-cookie'];
                 expect(header.length).to.equal(1);
                 expect(header[0]).to.contain('Max-Age=60');
-                var cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
                 /* eslint-disable hapi/no-shadow-relaxed */
-                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.result).to.equal('resource');
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.result).to.equal('resource');
 
-                    var header = res.headers['set-cookie'];
+                    header = res2.headers['set-cookie'];
                     expect(header.length).to.equal(1);
                     expect(header[0]).to.contain('Max-Age=60');
                     done();
@@ -854,13 +855,13 @@ describe('scheme', function () {
         });
     });
 
-    describe('set()', function () {
+    describe('set()', () => {
 
-        it('errors on missing session in set()', function (done) {
+        it('errors on missing session in set()', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -889,7 +890,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('Invalid session');
                     done();
@@ -897,11 +898,11 @@ describe('scheme', function () {
             });
         });
 
-        it('sets individual cookie key', function (done) {
+        it('sets individual cookie key', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -932,30 +933,30 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
-                    var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                    const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
                     expect(res.result).to.equal('steve');
-                    var header = res.headers['set-cookie'];
+                    const header = res.headers['set-cookie'];
                     expect(header.length).to.equal(1);
                     expect(header[0]).to.contain('Max-Age=60');
-                    var cookie = header[0].match(pattern);
+                    const cookie = header[0].match(pattern);
 
                     /* eslint-disable hapi/no-shadow-relaxed */
-                    server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                    server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                        expect(res.statusCode).to.equal(200);
+                        expect(res2.statusCode).to.equal(200);
                     });
                     /* eslint-enable hapi/no-shadow-relaxed */
                 });
             });
         });
 
-        it('throws on missing session when trying to set key', function (done) {
+        it('throws on missing session when trying to set key', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -984,7 +985,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('No active session to apply key to');
                     done();
@@ -992,11 +993,11 @@ describe('scheme', function () {
             });
         });
 
-        it('throws when trying to set key with invalid input', function (done) {
+        it('throws when trying to set key with invalid input', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1025,7 +1026,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('Invalid session key');
                     done();
@@ -1033,11 +1034,11 @@ describe('scheme', function () {
             });
         });
 
-        it('throws when trying to set key with null key', function (done) {
+        it('throws when trying to set key with null key', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1066,7 +1067,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('Invalid session key');
                     done();
@@ -1075,13 +1076,13 @@ describe('scheme', function () {
         });
     });
 
-    describe('clear()', function () {
+    describe('clear()', () => {
 
-        it('clear a specific session key', function (done) {
+        it('clear a specific session key', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1112,30 +1113,30 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
-                    var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                    const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
                     expect(res.result).to.equal('steve');
-                    var header = res.headers['set-cookie'];
+                    const header = res.headers['set-cookie'];
                     expect(header.length).to.equal(1);
                     expect(header[0]).to.contain('Max-Age=60');
-                    var cookie = header[0].match(pattern);
+                    const cookie = header[0].match(pattern);
 
                     /* eslint-disable hapi/no-shadow-relaxed */
-                    server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                    server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                        expect(res.statusCode).to.equal(200);
+                        expect(res2.statusCode).to.equal(200);
                     });
                     /* eslint-enable hapi/no-shadow-relaxed */
                 });
             });
         });
 
-        it('throws when trying to clear a key on missing session', function (done) {
+        it('throws when trying to clear a key on missing session', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1164,7 +1165,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('No active session to clear key from');
                     done();
@@ -1172,11 +1173,11 @@ describe('scheme', function () {
             });
         });
 
-        it('throws when trying to clear a key with invalid input', function (done) {
+        it('throws when trying to clear a key with invalid input', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1205,7 +1206,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('Invalid session key');
                     done();
@@ -1213,11 +1214,11 @@ describe('scheme', function () {
             });
         });
 
-        it('throws when trying to clear a key with null input', function (done) {
+        it('throws when trying to clear a key with null input', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1246,7 +1247,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
                     expect(res.result).to.equal('Invalid session key');
                     done();
@@ -1255,13 +1256,13 @@ describe('scheme', function () {
         });
     });
 
-    describe('ttl()', function () {
+    describe('ttl()', () => {
 
-        it('overrides ttl', function (done) {
+        it('overrides ttl', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1293,19 +1294,19 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/login/steve', function (res) {
+                server.inject('/login/steve', (res) => {
 
-                    var pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+                    const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
                     expect(res.result).to.equal('steve');
-                    var header = res.headers['set-cookie'];
+                    const header = res.headers['set-cookie'];
                     expect(header.length).to.equal(1);
                     expect(header[0]).to.contain('Max-Age=60');
-                    var cookie = header[0].match(pattern);
+                    const cookie = header[0].match(pattern);
 
                     /* eslint-disable hapi/no-shadow-relaxed */
-                    server.inject({ method: 'GET', url: '/ttl', headers: { cookie: 'special=' + cookie[1] } }, function (res) {
+                    server.inject({ method: 'GET', url: '/ttl', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                        expect(res.statusCode).to.equal(200);
+                        expect(res2.statusCode).to.equal(200);
                     });
                     /* eslint-enable hapi/no-shadow-relaxed */
                 });
@@ -1313,13 +1314,13 @@ describe('scheme', function () {
         });
     });
 
-    describe('redirection', function () {
+    describe('redirection', () => {
 
-        it('sends to login page (uri without query)', function (done) {
+        it('sends to login page (uri without query)', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1337,7 +1338,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(302);
                     expect(res.headers.location).to.equal('http://example.com/login?next=%2F');
@@ -1346,11 +1347,11 @@ describe('scheme', function () {
             });
         });
 
-        it('skips when redirectTo is set to false', function (done) {
+        it('skips when redirectTo is set to false', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1370,7 +1371,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(401);
                     done();
@@ -1378,11 +1379,11 @@ describe('scheme', function () {
             });
         });
 
-        it('skips when route override', function (done) {
+        it('skips when route override', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1409,7 +1410,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(401);
                     done();
@@ -1417,11 +1418,11 @@ describe('scheme', function () {
             });
         });
 
-        it('skips when redirectOnTry is false in try mode', function (done) {
+        it('skips when redirectOnTry is false in try mode', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1442,7 +1443,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(200);
                     expect(res.result).to.equal(false);
@@ -1451,11 +1452,11 @@ describe('scheme', function () {
             });
         });
 
-        it('sends to login page (uri with query)', function (done) {
+        it('sends to login page (uri with query)', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1473,7 +1474,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(302);
                     expect(res.headers.location).to.equal('http://example.com/login?mode=1&next=%2F');
@@ -1482,11 +1483,11 @@ describe('scheme', function () {
             });
         });
 
-        it('sends to login page and does not append the next query when appendNext is false', function (done) {
+        it('sends to login page and does not append the next query when appendNext is false', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1504,7 +1505,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(302);
                     expect(res.headers.location).to.equal('http://example.com/login?mode=1');
@@ -1513,11 +1514,11 @@ describe('scheme', function () {
             });
         });
 
-        it('appends the custom query when appendNext is string', function (done) {
+        it('appends the custom query when appendNext is string', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1535,7 +1536,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(302);
                     expect(res.headers.location).to.equal('http://example.com/login?mode=1&done=%2F');
@@ -1544,11 +1545,11 @@ describe('scheme', function () {
             });
         });
 
-        it('redirect on try', function (done) {
+        it('redirect on try', (done) => {
 
-            var server = new Hapi.Server();
+            const server = new Hapi.Server();
             server.connection();
-            server.register(require('../'), function (err) {
+            server.register(require('../'), (err) => {
 
                 expect(err).to.not.exist();
 
@@ -1566,7 +1567,7 @@ describe('scheme', function () {
                     }
                 });
 
-                server.inject('/', function (res) {
+                server.inject('/', (res) => {
 
                     expect(res.statusCode).to.equal(302);
                     done();
@@ -1575,11 +1576,11 @@ describe('scheme', function () {
         });
     });
 
-    it('clear cookie on invalid', function (done) {
+    it('clear cookie on invalid', (done) => {
 
-        var server = new Hapi.Server();
+        const server = new Hapi.Server();
         server.connection();
-        server.register(require('../'), function (err) {
+        server.register(require('../'), (err) => {
 
             expect(err).to.not.exist();
 
@@ -1596,7 +1597,7 @@ describe('scheme', function () {
                 }
             });
 
-            server.inject({ url: '/', headers: { cookie: 'sid=123456' } }, function (res) {
+            server.inject({ url: '/', headers: { cookie: 'sid=123456' } }, (res) => {
 
                 expect(res.statusCode).to.equal(401);
                 expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Path=/');
