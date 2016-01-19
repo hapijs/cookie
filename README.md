@@ -88,11 +88,11 @@ const users = {
 
 const home = function (request, reply) {
 
-    reply('<html><head><title>Login page</title></head><body><h3>Welcome '
-      + request.auth.credentials.name
-      + '!</h3><br/><form method="get" action="/logout">'
-      + '<input type="submit" value="Logout">'
-      + '</form></body></html>');
+    reply('<html><head><title>Login page</title></head><body><h3>Welcome ' +
+      request.auth.credentials.name +
+      '!</h3><br/><form method="get" action="/logout">' +
+      '<input type="submit" value="Logout">' +
+      '</form></body></html>');
 };
 
 const login = function (request, reply) {
@@ -124,12 +124,12 @@ const login = function (request, reply) {
     if (request.method === 'get' ||
         message) {
 
-        return reply('<html><head><title>Login page</title></head><body>'
-            + (message ? '<h3>' + message + '</h3><br/>' : '')
-            + '<form method="post" action="/login">'
-            + 'Username: <input type="text" name="username"><br>'
-            + 'Password: <input type="password" name="password"><br/>'
-            + '<input type="submit" value="Login"></form></body></html>');
+        return reply('<html><head><title>Login page</title></head><body>' +
+            (message ? '<h3>' + message + '</h3><br/>' : '') +
+            '<form method="post" action="/login">' +
+            'Username: <input type="text" name="username"><br>' +
+            'Password: <input type="password" name="password"><br/>' +
+            '<input type="submit" value="Login"></form></body></html>');
     }
 
     const sid = String(++uuid);
