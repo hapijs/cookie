@@ -120,7 +120,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -204,7 +204,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -271,7 +271,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -335,7 +335,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -398,7 +398,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -460,7 +460,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 cookie: 'special',
                 clearInvalid: true
@@ -515,7 +515,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 cookie: 'special',
                 clearInvalid: true,
@@ -573,7 +573,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 domain: 'example.com',
                 cookie: 'special',
                 clearInvalid: true,
@@ -618,7 +618,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -678,7 +678,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -739,7 +739,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -796,7 +796,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 domain: 'example.com',
                 cookie: 'special',
@@ -866,7 +866,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -907,7 +907,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -961,7 +961,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1002,7 +1002,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1043,7 +1043,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1087,7 +1087,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1141,7 +1141,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1182,7 +1182,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1223,7 +1223,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1267,7 +1267,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 1000,
                     cookie: 'special',
                     clearInvalid: true
@@ -1325,7 +1325,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login',
                     appendNext: true
@@ -1356,7 +1356,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: false,
                     appendNext: true
@@ -1388,7 +1388,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login',
                     appendNext: true
@@ -1427,7 +1427,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', 'try', {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectOnTry: false,
                     redirectTo: 'http://example.com/login',
@@ -1461,7 +1461,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login?mode=1',
                     appendNext: true
@@ -1492,7 +1492,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login?mode=1',
                     appendNext: false
@@ -1523,7 +1523,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login?mode=1',
                     appendNext: 'done'
@@ -1554,7 +1554,7 @@ describe('scheme', () => {
                 expect(err).to.not.exist();
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
                     redirectTo: 'http://example.com/login',
                     appendNext: true
@@ -1585,7 +1585,7 @@ describe('scheme', () => {
             expect(err).to.not.exist();
 
             server.auth.strategy('default', 'cookie', true, {
-                password: 'password',
+                password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 clearInvalid: true
             });
