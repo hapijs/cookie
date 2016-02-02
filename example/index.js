@@ -89,7 +89,7 @@ server.register(require('../'), (err) => {
     server.app.cache = cache;
 
     server.auth.strategy('session', 'cookie', true, {
-        password: 'secret',
+        password: 'password-should-be-32-characters',
         cookie: 'sid-example',
         redirectTo: '/login',
         isSecure: false,
