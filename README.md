@@ -16,7 +16,7 @@ in possession of the cookie content can use it to impersonate its true owner. Th
 takes the following required options:
 
 - `cookie` - the cookie name. Defaults to `'sid'`.
-- `password` - used for Iron cookie encoding.
+- `password` - used for Iron cookie encoding. Should be at least 32 characters long.
 - `ttl` - sets the cookie expires time in milliseconds. Defaults to single browser session (ends
   when browser closes).
 - `domain` - sets the cookie Domain value. Defaults to none.
@@ -163,7 +163,7 @@ server.register(require('../'), (err) => {
     server.app.cache = cache;
 
     server.auth.strategy('session', 'cookie', true, {
-        password: 'secret',
+        password: 'password-should-be-32-characters',
         cookie: 'sid-example',
         redirectTo: '/login',
         isSecure: false,

@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "code": "2.x.x",
-    "hapi": "12.x.x",
+    "hapi": "13.x.x",
     "lab": "8.x.x"
   },
   "scripts": {
