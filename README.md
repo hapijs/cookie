@@ -49,8 +49,7 @@ takes the following required options:
         - `err` - an internal error.
         - `isValid` - `true` if the content of the session is valid, otherwise `false`.
         - `credentials` - a credentials object passed back to the application in
-          `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
-          set, will override the current cookie as if `request.cookieAuth.set()` was called.
+          `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`.
 
 When the cookie scheme is enabled on a route, the `request.cookieAuth` objects is decorated with
 the following methods:
