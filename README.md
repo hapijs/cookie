@@ -51,6 +51,7 @@ takes the following required options:
         - `credentials` - a credentials object passed back to the application in
           `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
           set, will override the current cookie as if `request.cookieAuth.set()` was called.
+- `requestDecoratorName` - an optional name to use with decorating the `request` object.  Defaults to `'cookieAuth'`.
 
 When the cookie scheme is enabled on a route, the `request.cookieAuth` objects is decorated with
 the following methods:
