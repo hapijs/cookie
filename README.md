@@ -6,14 +6,18 @@
 
 Lead Maintainer: [James Weston](https://github.com/jaw187)
 
-Cookie authentication provides a simple cookie-based session management. The user has to be
-authenticated via other means, typically a web form, and upon successful authentication,
-receive a reply with a session cookie. Subsequent requests containing the session cookie are
-authenticated (the cookie uses [Iron](https://github.com/hueniverse/iron) to encrypt and sign the
-session content) and validated via the provided `validateFunc` in case the cookie's encrypted
-content requires validation on each request. Note that cookie operates as a bearer token and anyone
-in possession of the cookie content can use it to impersonate its true owner. The `'cookie`' scheme
-takes the following required options:
+Cookie authentication provides simple cookie-based session management. The user has to be
+authenticated via other means, typically a web form, and upon successful authentication
+the browser receives a reply with a session cookie. The cookie uses [Iron](https://github.com/hueniverse/iron) to encrypt and sign the session content.
+
+Subsequent requests containing the session cookie are authenticated and validated via the provided `validateFunc` in case the cookie's encrypted content requires validation on each request.
+
+It is important to remember a couple of things:
+
+1. Cookies have a practical maximum length. All of the data you store in a cookie is sent to the browser. If your cookie is too long, browsers may not set it. Read more [here](http://webdesign.about.com/od/cookies/f/web-cookies-size-limit.htm) and [here](http://www.ietf.org/rfc/rfc2965.txt). If you need need to store more data, store a small amount of identifying data in the cookie and use that as a key to a server-side cache system.
+2. Each cookie operates as a bearer token and anyone in possession of the cookie content can use it to impersonate its true owner. 
+
+The `'cookie`' scheme takes the following required options:
 
 - `cookie` - the cookie name. Defaults to `'sid'`.
 - `password` - used for Iron cookie encoding. Should be at least 32 characters long.
