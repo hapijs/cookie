@@ -50,7 +50,7 @@ describe('scheme', () => {
 
             expect(() => {
 
-                server.auth.strategy('default', 'cookie', true, { password: 'password' });
+                server.auth.strategy('default', 'cookie', true, { password: 'password-should-be-32-characters' });
             }).to.not.throw();
 
             done();
@@ -102,7 +102,7 @@ describe('scheme', () => {
             expect(() => {
 
                 server.auth.strategy('default', 'cookie', true, {
-                    password: 'password',
+                    password: 'password-should-be-32-characters',
                     keepAlive: true
                 });
             }).to.throw(Error);
@@ -1603,6 +1603,38 @@ describe('scheme', () => {
                 expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Path=/');
                 done();
             });
+        });
+    });
+
+    it('supports many strategies', (done) => {
+
+        const server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), (err) => {
+
+            expect(err).to.not.exist();
+
+            expect(() => {
+
+                const options = {
+                    cookie: 'cookieAuth',
+                    requestDecoratorName: 'cookieAuth',
+                    password: 'password-should-be-32-characters'
+                };
+                server.auth.strategy('default', 'cookie', options);
+            }).to.not.throw();
+
+            expect(() => {
+
+                const options = {
+                    cookie: 'anotherCookieAuth',
+                    requestDecoratorName: 'anotherCookieAuth',
+                    password: 'password-should-be-32-characters'
+                };
+                server.auth.strategy('notDefault', 'cookie', options);
+            }).to.not.throw();
+
+            done();
         });
     });
 });
