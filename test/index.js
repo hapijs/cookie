@@ -1358,7 +1358,7 @@ describe('scheme', () => {
                 server.auth.strategy('default', 'cookie', true, {
                     password: 'password-should-be-32-characters',
                     ttl: 60 * 1000,
-                    redirectTo: () => 'http://example.com/login',
+                    redirectTo: (request) => 'http://example.com/login?widget=' + request.query.widget,
                     appendNext: true
                 });
 
@@ -1369,10 +1369,10 @@ describe('scheme', () => {
                     }
                 });
 
-                server.inject('/', (res) => {
+                server.inject('/?widget=foo', (res) => {
 
                     expect(res.statusCode).to.equal(302);
-                    expect(res.headers.location).to.equal('http://example.com/login?next=%2F');
+                    expect(res.headers.location).to.equal('http://example.com/login?widget=foo&next=%2F%3Fwidget%3Dfoo');
                     done();
                 });
             });
