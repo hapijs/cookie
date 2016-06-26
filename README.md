@@ -17,7 +17,7 @@ It is important to remember a couple of things:
 1. Each cookie operates as a bearer token and anyone in possession of the cookie content can use it to impersonate its true owner. 
 2. Cookies have a practical maximum length. All of the data you store in a cookie is sent to the browser. If your cookie is too long, browsers may not set it. Read more [here](http://webdesign.about.com/od/cookies/f/web-cookies-size-limit.htm) and [here](http://www.ietf.org/rfc/rfc2965.txt). If you need need to store more data, store a small amount of identifying data in the cookie and use that as a key to a server-side cache system.
 
-The `'cookie`' scheme takes the following required options:
+The `'cookie`' scheme takes the following options:
 
 - `cookie` - the cookie name. Defaults to `'sid'`.
 - `password` - used for Iron cookie encoding. Should be at least 32 characters long.
