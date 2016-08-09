@@ -22,7 +22,7 @@ The `'cookie`' scheme takes the following required options:
 - `cookie` - the cookie name. Defaults to `'sid'`.
 - `password` - used for Iron cookie encoding. Should be at least 32 characters long.
 - `ttl` - sets the cookie expires time in milliseconds. Defaults to single browser session (ends
-  when browser closes).
+  when browser closes). Required when `keepAlive` is `true`.
 - `domain` - sets the cookie Domain value. Defaults to none.
 - `path` - sets the cookie path value. Defaults to `/`.
 - `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as
