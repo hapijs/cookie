@@ -17,45 +17,34 @@ It is important to remember a couple of things:
 1. Each cookie operates as a bearer token and anyone in possession of the cookie content can use it to impersonate its true owner. 
 2. Cookies have a practical maximum length. All of the data you store in a cookie is sent to the browser. If your cookie is too long, browsers may not set it. Read more [here](http://webdesign.about.com/od/cookies/f/web-cookies-size-limit.htm) and [here](http://www.ietf.org/rfc/rfc2965.txt). If you need need to store more data, store a small amount of identifying data in the cookie and use that as a key to a server-side cache system.
 
-The `'cookie`' scheme takes the following required options:
+The `'cookie`' scheme takes the following options:
 
-- `cookie` - the cookie name. Defaults to `'sid'`.
-- `password` - used for Iron cookie encoding. Should be at least 32 characters long.
-- `ttl` - sets the cookie expires time in milliseconds. Defaults to single browser session (ends
-  when browser closes).
-- `domain` - sets the cookie Domain value. Defaults to none.
-- `path` - sets the cookie path value. Defaults to `/`.
-- `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as
-  expired in the response and cleared. Defaults to `false`.
-- `keepAlive` - if `true`, automatically sets the session cookie after validation to extend the
-  current session for a new `ttl` duration. Defaults to `false`.
-- `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
-  exposes it to attacks. Defaults to `true`.
-- `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
-- `redirectTo` - optional login URI to redirect unauthenticated requests to. Note that using
-  `redirectTo` with authentication mode `'try'` will cause the protected endpoint to always
-  redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use
-  the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
-  Defaults to no redirection.
-- `appendNext` - if `true` and `redirectTo` is `true`, appends the current request path to the
-  query component of the `redirectTo` URI using the parameter name `'next'`. Set to a string to use
-  a different parameter name. Defaults to `false`.
-- `redirectOnTry` - if `false` and route authentication mode is `'try'`, authentication errors will
-  not trigger a redirection. Requires **hapi** version 6.2.0 or newer. Defaults to `true`;
-- `validateFunc` - an optional session validation function used to validate the content of the
-  session cookie on each request. Used to verify that the internal session state is still valid
-  (e.g. user account still exists). The function has the signature `function(request, session, callback)`
+| Name | Default | Description |
+| ---- |:------- |:----------- |
+| `cookie` | `'sid'` | the cookie name. |
+| `password` |  | used for Iron cookie encoding. Should be at least 32 characters long.
+| `ttl` | single browser session (ends when browser closes) | sets the cookie expires time in milliseconds. |
+| `domain` | none | sets the cookie Domain value. |
+| `path` | `/` | sets the cookie path value. |
+| `clearInvalid` | `false` | if `true`, any authentication cookie that fails validation will be marked as expired in the response and cleared. |
+| `keepAlive` | `false` | if `true`, automatically sets the session cookie after validation to extend the current session for a new `ttl` duration. | 
+| `isSecure` | `true` | if `false`, the cookie is allowed to be transmitted over insecure connections which exposes it to attacks. |
+| `isHttpOnly` | `true` | if `false`, the cookie will not include the 'HttpOnly' flag.
+| `redirectTo` | no redirection | optional login URI to redirect unauthenticated requests to. Note that using `redirectTo` with authentication mode `'try'` will cause the protected endpoint to always redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`). |
+| `appendNext` | `false` | if `true` and `redirectTo` is `true`, appends the current request path to the query component of the `redirectTo` URI using the parameter name `'next'`. Set to a string to use a different parameter name.
+| `redirectOnTry` | `true` | if `false` and route authentication mode is `'try'`, authentication errors will not trigger a redirection. Requires **hapi** version 6.2.0 or newer.
+| `requestDecoratorName`| | *USE WITH CAUTION* an optional name to use with decorating the `request` object.  Defaults to `'cookieAuth'`.  Using multiple decorator names for separate authentication strategies could allow a developer to call the methods for the wrong strategy.  Potentially resulting in unintended authorized access. |
+| `validateFunc` |  | an optional session validation function used to validate the content of the session cookie on each request. Used to verify that the internal session state is still valid (e.g. user account still exists). The function has the signature `function(request, session, callback)` with parameters described below:
+
+- `request` - is the Hapi request object of the request which is being authenticated.
+- `session` - is the session object set via `request.cookieAuth.set()`.
+- `callback` - a callback function with the signature `function(err, isValid, credentials)`
   where:
-    - `request` - is the Hapi request object of the request which is being authenticated.
-    - `session` - is the session object set via `request.cookieAuth.set()`.
-    - `callback` - a callback function with the signature `function(err, isValid, credentials)`
-      where:
-        - `err` - an internal error.
-        - `isValid` - `true` if the content of the session is valid, otherwise `false`.
-        - `credentials` - a credentials object passed back to the application in
-          `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
-          set, will override the current cookie as if `request.cookieAuth.set()` was called.
-- `requestDecoratorName` - *USE WITH CAUTION* an optional name to use with decorating the `request` object.  Defaults to `'cookieAuth'`.  Using multiple decorator names for separate authentication strategies could allow a developer to call the methods for the wrong strategy.  Potentially resulting in unintended authorized access.
+    - `err` - an internal error.
+    - `isValid` - `true` if the content of the session is valid, otherwise `false`.
+    - `credentials` - a credentials object passed back to the application in
+      `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
+      set, will override the current cookie as if `request.cookieAuth.set()` was called.
 
 When the cookie scheme is enabled on a route, the `request.cookieAuth` objects is decorated with
 the following methods:
