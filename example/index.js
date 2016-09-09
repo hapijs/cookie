@@ -70,7 +70,7 @@ const loginData = function (request, reply) {
         }
     }
 
-    if(errorMessage){
+    if (errorMessage){
         const html = `
             <html>
                 <head><title>Login error</title></head>
