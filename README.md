@@ -29,6 +29,7 @@ The `'cookie`' scheme takes the following required options:
   expired in the response and cleared. Defaults to `false`.
 - `keepAlive` - if `true`, automatically sets the session cookie after validation to extend the
   current session for a new `ttl` duration. Defaults to `false`.
+- `isSameSite` - if `false` omitted. Other options `Strict` or `Lax`. Defaults to `Strict`.
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
   exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
