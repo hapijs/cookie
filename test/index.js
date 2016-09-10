@@ -318,7 +318,7 @@ describe('scheme', () => {
 
                     expect(res2.statusCode).to.equal(200);
                     expect(res2.result).to.equal('logged-out');
-                    expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
+                    expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com; Path=/');
                     done();
                 });
                 /* eslint-enable hapi/no-shadow-relaxed */
@@ -380,7 +380,7 @@ describe('scheme', () => {
                 /* eslint-disable hapi/no-shadow-relaxed */
                 server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } }, (res2) => {
 
-                    expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Domain=example.com; Path=/');
+                    expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com; Path=/');
                     expect(res2.statusCode).to.equal(401);
                     done();
                 });
@@ -1600,7 +1600,7 @@ describe('scheme', () => {
             server.inject({ url: '/', headers: { cookie: 'sid=123456' } }, (res) => {
 
                 expect(res.statusCode).to.equal(401);
-                expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Path=/');
+                expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Path=/');
                 done();
             });
         });
