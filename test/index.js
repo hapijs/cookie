@@ -1293,6 +1293,98 @@ describe('scheme', () => {
             expect(res.headers.location).to.equal('http://example.com/login?mode=1');
         });
 
+        it('uses the updated path by default when onRequest re-routes', async () => {
+
+            const server = new Hapi.Server();
+            await  server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login?mode=1',
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/', handler: function (request, h) {
+
+                    return h.response('never');
+                }
+            });
+
+            server.ext('onRequest', (request, h) => {
+
+                request.setUrl('/');
+
+                return h.continue;
+            });
+
+            const res = await server.inject('/foo?bar=baz');
+
+            expect(res.statusCode).to.equal(302);
+            expect(res.headers.location).to.equal('http://example.com/login?mode=1&next=%2F');
+        });
+
+        it('retains the original path for appendNext when onRequest re-routes when raw is set to true', async () => {
+
+            const server = new Hapi.Server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login?mode=1',
+                appendNext: { raw: true }
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/', handler: function (request, h) {
+
+                    return h.response('never');
+                }
+            });
+
+            server.ext('onRequest', (request, h) => {
+
+                request.setUrl('/');
+
+                return h.continue;
+            });
+
+            const res = await server.inject('/foo?bar=baz');
+
+            expect(res.statusCode).to.equal(302);
+            expect(res.headers.location).to.equal('http://example.com/login?mode=1&next=%2Ffoo%3Fbar%3Dbaz');
+        });
+
+        it('sets the appendNext parameter to the value defined within the object', async () => {
+
+            const server = new Hapi.Server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login?mode=1',
+                appendNext: { name: 'return_to' }
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/foo', handler: function (request, reply) {
+
+                    return reply('never');
+                }
+            });
+
+            const res = await server.inject('/foo?bar=baz');
+
+            expect(res.statusCode).to.equal(302);
+            expect(res.headers.location).to.equal('http://example.com/login?mode=1&return_to=%2Ffoo%3Fbar%3Dbaz');
+        });
+
         it('appends the custom query when appendNext is string', async () => {
 
             const server = Hapi.server();
