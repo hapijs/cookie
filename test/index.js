@@ -1316,7 +1316,7 @@ describe('scheme', () => {
 
     describe('redirection', () => {
 
-        it('sends to login page (uri without query)', (done) => {
+        it('sends to login page (url without query)', (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -1418,41 +1418,7 @@ describe('scheme', () => {
             });
         });
 
-        it('skips when redirectOnTry is false in try mode', (done) => {
-
-            const server = new Hapi.Server();
-            server.connection();
-            server.register(require('../'), (err) => {
-
-                expect(err).to.not.exist();
-
-                server.auth.strategy('default', 'cookie', 'try', {
-                    password: 'password-should-be-32-characters',
-                    ttl: 60 * 1000,
-                    redirectOnTry: false,
-                    redirectTo: 'http://example.com/login',
-                    appendNext: true
-                });
-
-                server.route({
-                    method: 'GET',
-                    path: '/',
-                    handler: function (request, reply) {
-
-                        return reply(request.auth.isAuthenticated);
-                    }
-                });
-
-                server.inject('/', (res) => {
-
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.result).to.equal(false);
-                    done();
-                });
-            });
-        });
-
-        it('sends to login page (uri with query)', (done) => {
+        it('sends to login page (url with query)', (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -1545,7 +1511,7 @@ describe('scheme', () => {
             });
         });
 
-        it('redirect on try', (done) => {
+        it('skips redirect on try', (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -1569,7 +1535,37 @@ describe('scheme', () => {
 
                 server.inject('/', (res) => {
 
-                    expect(res.statusCode).to.equal(302);
+                    expect(res.statusCode).to.equal(200);
+                    done();
+                });
+            });
+        });
+
+        it('skips redirect on optional', (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+            server.register(require('../'), (err) => {
+
+                expect(err).to.not.exist();
+
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000,
+                    redirectTo: 'http://example.com/login',
+                    appendNext: true
+                });
+
+                server.route({
+                    method: 'GET', path: '/', config: { auth: { mode: 'optional' } }, handler: function (request, reply) {
+
+                        return reply('optional');
+                    }
+                });
+
+                server.inject('/', (res) => {
+
+                    expect(res.statusCode).to.equal(200);
                     done();
                 });
             });
