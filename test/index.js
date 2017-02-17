@@ -855,6 +855,30 @@ describe('scheme', () => {
         });
     });
 
+    it('errors if ignoreIfDecorated is false and the request object is already decorated', (done) => {
+
+        const password = 'password-should-be-32-characters';
+        const ignoreIfDecorated = false;
+        const options = { password, ignoreIfDecorated };
+
+        const server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), (err) => {
+
+            expect(err).to.not.exist();
+
+            server.auth.strategy('default', 'cookie', true, options);
+
+            expect(err).to.not.exist();
+            expect(() => {
+
+                server.auth.strategy('default', 'cookie', true, options);
+            }).to.throw(Error);
+
+            done();
+        });
+    });
+
     describe('set()', () => {
 
         it('errors on missing session in set()', (done) => {
