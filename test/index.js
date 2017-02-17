@@ -1347,6 +1347,37 @@ describe('scheme', () => {
             });
         });
 
+        it('sends to login page when redirectTo is a function', (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+            server.register(require('../'), (err) => {
+
+                expect(err).to.not.exist();
+
+                server.auth.strategy('default', 'cookie', true, {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000,
+                    redirectTo: (request) => 'http://example.com/login?widget=' + request.query.widget,
+                    appendNext: true
+                });
+
+                server.route({
+                    method: 'GET', path: '/', handler: function (request, reply) {
+
+                        return reply('never');
+                    }
+                });
+
+                server.inject('/?widget=foo', (res) => {
+
+                    expect(res.statusCode).to.equal(302);
+                    expect(res.headers.location).to.equal('http://example.com/login?widget=foo&next=%2F%3Fwidget%3Dfoo');
+                    done();
+                });
+            });
+        });
+
         it('skips when redirectTo is set to false', (done) => {
 
             const server = new Hapi.Server();
