@@ -2,6 +2,7 @@
 
 // Load modules
 
+const Boom = require('boom');
 const Code = require('code');
 const Hapi = require('hapi');
 const Hoek = require('hoek');
@@ -521,7 +522,7 @@ describe('scheme', () => {
                 clearInvalid: true,
                 validateFunc: function (request, session, callback) {
 
-                    return callback(new Error('boom'));
+                    return callback(null, false);
                 }
             });
 
@@ -561,6 +562,80 @@ describe('scheme', () => {
                 });
             });
             /* eslint-enable hapi/no-shadow-relaxed */
+        });
+    });
+
+    it('uauthorized error in validation function fails over to subsequent authentication scheme', (done) => {
+
+        const server = new Hapi.Server();
+        server.connection();
+        server.register(require('../'), (err) => {
+
+            expect(err).to.not.exist();
+
+            server.auth.scheme('bogus', () => {
+
+                return {
+                    authenticate: (request, reply) => {
+
+                        return reply.continue({ credentials: { user: 'bogus-user' } });
+                    }
+                };
+            });
+
+            server.auth.strategy('first', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                cookie: 'first',
+                validateFunc: function (request, session, callback) {
+
+                    return callback(Boom.unauthorized(null, 'first'));
+                }
+            });
+
+            server.auth.strategy('second', 'bogus');
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    handler: function (request, reply) {
+
+                        request.cookieAuth.set({ user: request.params.user });
+                        return reply(request.params.user);
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/resource',
+                config: {
+                    auth: { mode: 'required', strategies: ['first', 'second'] },
+                    handler: function (request, reply) {
+
+                        return reply('valid-resource');
+                    }
+                }
+            });
+
+            server.inject('/login/bob', (res) => {
+
+                expect(res.result).to.equal('bob');
+                const header = res.headers['set-cookie'];
+                expect(header.length).to.equal(1);
+                expect(header[0]).to.contain('Max-Age=60');
+                const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+
+                server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'first=' + cookie[1] } }, (res2) => {
+
+                    expect(res2.statusCode).to.equal(200);
+                    expect(res2.headers['set-cookie']).to.not.exist();
+                    expect(res2.result).to.equal('valid-resource');
+                    expect(res2.request.auth.isAuthenticated).to.be.true();
+                    expect(res2.request.auth.credentials.user).to.equal('bogus-user');
+                    done();
+                });
+            });
+
         });
     });
 
