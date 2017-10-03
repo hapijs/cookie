@@ -33,7 +33,7 @@ The `'cookie`' scheme takes the following options:
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
   exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
-- `redirectTo` - optional login URI to redirect unauthenticated requests to. Note that using
+- `redirectTo` - optional login URI or function `function(request)` that returns a URI to redirect unauthenticated requests to. Note that using
   `redirectTo` with authentication mode `'try'` will cause the protected endpoint to always
   redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use
   the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
