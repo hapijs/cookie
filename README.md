@@ -152,6 +152,7 @@ const login = function (request, reply) {
 
 const logout = function (request, reply) {
 
+    request.server.app.cache.drop(request.state['sid-example'].sid);
     request.cookieAuth.clear();
     return reply.redirect('/');
 };
