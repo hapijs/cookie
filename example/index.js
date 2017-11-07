@@ -59,13 +59,13 @@ const login = function (request, reply) {
     }
 
     const sid = String(++uuid);
-    request.server.app.cache.set(sid, { account: account }, 0, (err) => {
+    request.server.app.cache.set(sid, { account }, 0, (err) => {
 
         if (err) {
             return reply(err);
         }
 
-        request.cookieAuth.set({ sid: sid });
+        request.cookieAuth.set({ sid });
         return reply.redirect('/');
     });
 };
