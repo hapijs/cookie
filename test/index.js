@@ -54,7 +54,7 @@ describe('scheme', () => {
 
         expect(() => {
 
-            server.auth.strategy('session', 'cookie', { password: new Buffer('foobar') });
+            server.auth.strategy('session', 'cookie', { password: Buffer.from('foobar') });
         }).to.not.throw();
     });
 
