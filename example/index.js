@@ -12,19 +12,19 @@ const users = {
     }
 };
 
-const home = function (request, reply) {
+const home = function (request, h) {
 
-    reply('<html><head><title>Login page</title></head><body><h3>Welcome ' +
+    return '<html><head><title>Login page</title></head><body><h3>Welcome ' +
       request.auth.credentials.name +
       '!</h3><br/><form method="get" action="/logout">' +
       '<input type="submit" value="Logout">' +
-      '</form></body></html>');
+      '</form></body></html>';
 };
 
-const login = function (request, reply) {
+const login = async (request, h) => {
 
     if (request.auth.isAuthenticated) {
-        return reply.redirect('/');
+        return h.redirect('/');
     }
 
     let message = '';
@@ -50,65 +50,58 @@ const login = function (request, reply) {
     if (request.method === 'get' ||
         message) {
 
-        return reply('<html><head><title>Login page</title></head><body>' +
+        return '<html><head><title>Login page</title></head><body>' +
             (message ? '<h3>' + message + '</h3><br/>' : '') +
             '<form method="post" action="/login">' +
             'Username: <input type="text" name="username"><br>' +
             'Password: <input type="password" name="password"><br/>' +
-            '<input type="submit" value="Login"></form></body></html>');
+            '<input type="submit" value="Login"></form></body></html>';
     }
 
     const sid = String(++uuid);
-    request.server.app.cache.set(sid, { account: account }, 0, (err) => {
 
-        if (err) {
-            return reply(err);
-        }
+    await request.server.app.cache.set(sid, { account }, 0);
+    request.cookieAuth.set({ sid });
 
-        request.cookieAuth.set({ sid: sid });
-        return reply.redirect('/');
-    });
+    return h.redirect('/');
 };
 
-const logout = function (request, reply) {
+const logout = function (request, h) {
 
     request.cookieAuth.clear();
-    return reply.redirect('/');
+    return h.redirect('/');
 };
 
-const server = new Hapi.Server();
-server.connection({ port: 8000 });
+const server = new Hapi.Server({ port: 8000 });
 
-server.register(require('../'), (err) => {
+exports.start = async () => {
 
-    if (err) {
-        throw err;
-    }
+    await server.register(require('../'));
 
     const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;
 
-    server.auth.strategy('session', 'cookie', true, {
+    server.auth.strategy('session', 'cookie', {
         password: 'password-should-be-32-characters',
         cookie: 'sid-example',
         redirectTo: '/login',
         isSecure: false,
-        validateFunc: function (request, session, callback) {
+        validateFunc: async function (request, session) {
 
-            cache.get(session.sid, (err, cached) => {
+            const cached = await cache.get(session.sid);
+            const out = {
+                valid: !!cached
+            };
 
-                if (err) {
-                    return callback(err, false);
-                }
+            if (out.valid) {
+                out.credentials = cached.account;
+            }
 
-                if (!cached) {
-                    return callback(null, false);
-                }
-
-                return callback(null, true, cached.account);
-            });
+            return out;
         }
     });
+
+    server.auth.default('session');
 
     server.route([
         { method: 'GET', path: '/', config: { handler: home } },
@@ -116,8 +109,14 @@ server.register(require('../'), (err) => {
         { method: 'GET', path: '/logout', config: { handler: logout } }
     ]);
 
-    server.start(() => {
+    await server.start();
 
-        console.log('Server ready');
-    });
-});
+    console.log('Server ready');
+};
+
+try {
+    exports.start();
+}
+catch (err) {
+    console.log(err.stack);
+}
