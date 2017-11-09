@@ -12,7 +12,7 @@
     "session"
   ],
   "engines": {
-    "node": ">=4.x.x"
+    "node": ">=8.9.x"
   },
   "dependencies": {
     "boom": "3.x.x",
