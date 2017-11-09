@@ -72,7 +72,7 @@ const logout = function (request, h) {
     return h.redirect('/');
 };
 
-const server = new Hapi.Server({ port: 8000 });
+const server = Hapi.server({ port: 8000 });
 
 exports.start = async () => {
 

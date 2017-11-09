@@ -24,10 +24,10 @@ const Helpers = require('./helpers');
 
 describe('scheme', () => {
 
-    it('fails with no plugin options', () => {
+    it('fails with no plugin options', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         expect(() => {
 
@@ -35,10 +35,10 @@ describe('scheme', () => {
         }).to.throw(Error);
     });
 
-    it('passes with a password configured', () => {
+    it('passes with a password configured', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         expect(() => {
 
@@ -47,10 +47,10 @@ describe('scheme', () => {
         }).to.not.throw();
     });
 
-    it('passes with a password configured which is a Buffer', () => {
+    it('passes with a password configured which is a Buffer', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         expect(() => {
 
@@ -58,10 +58,10 @@ describe('scheme', () => {
         }).to.not.throw();
     });
 
-    it('fails if validateFunc is not a function', () => {
+    it('fails if validateFunc is not a function', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         expect(() => {
 
@@ -69,10 +69,10 @@ describe('scheme', () => {
         }).to.throw(Error);
     });
 
-    it('fails if keepAlive is configured but not ttl', () => {
+    it('fails if keepAlive is configured but not ttl', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         expect(() => {
 
@@ -85,8 +85,8 @@ describe('scheme', () => {
 
     it('authenticates a request', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('session', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -118,13 +118,11 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         expect(res2.headers['set-cookie']).to.not.exist();
         expect(res2.result).to.equal('resource');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('fails over to another strategy if not present', async () => {
@@ -147,8 +145,8 @@ describe('scheme', () => {
             name: 'simpleTestAuth'
         };
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -197,8 +195,8 @@ describe('scheme', () => {
 
     it('ends a session', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -247,19 +245,17 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/logout', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         expect(res2.result).to.equal('logged-out');
         expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com; Path=/');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('fails a request with invalid session', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -290,18 +286,16 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com; Path=/');
         expect(res2.statusCode).to.equal(401);
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('does not clear a request with invalid session (clearInvalid not set)', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -332,18 +326,16 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.headers['set-cookie']).to.not.exist();
         expect(res2.statusCode).to.equal(401);
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('logs in and authenticates a request', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -363,18 +355,16 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         expect(res2.result).to.equal('resource');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('errors in validation function', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -390,7 +380,6 @@ describe('scheme', () => {
 
         Helpers.loginWithResourceEndpoint(server);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res = await server.inject('/login/steve');
 
         expect(res.result).to.equal('steve');
@@ -402,13 +391,12 @@ describe('scheme', () => {
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(401);
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('authenticates a request (no ttl)', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -450,8 +438,8 @@ describe('scheme', () => {
 
     it('authenticates a request (no session override)', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -479,18 +467,16 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         expect(res2.result).to.equal('resource');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('authenticates a request (no session override) on a sub-path', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -536,18 +522,16 @@ describe('scheme', () => {
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
         expect(header[0]).to.contain('Path=/subpath');
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/subpath/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         expect(res2.result).to.equal('resource');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('extends ttl automatically', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -568,20 +552,18 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         header = res2.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
     it('extends ttl automatically (validateFunc)', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -613,7 +595,6 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        /* eslint-disable hapi/no-shadow-relaxed */
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
@@ -622,17 +603,16 @@ describe('scheme', () => {
         header = res2.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        /* eslint-enable hapi/no-shadow-relaxed */
     });
 
-    it('errors if ignoreIfDecorated is false and the request object is already decorated', () => {
+    it('errors if ignoreIfDecorated is false and the request object is already decorated', async () => {
 
         const password = 'password-should-be-32-characters';
         const ignoreIfDecorated = false;
         const options = { password, ignoreIfDecorated };
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', options);
 
@@ -646,8 +626,8 @@ describe('scheme', () => {
 
         it('errors on missing session in set()', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -682,8 +662,8 @@ describe('scheme', () => {
 
         it('sets individual cookie key', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -722,17 +702,15 @@ describe('scheme', () => {
             expect(header[0]).to.contain('Max-Age=60');
             const cookie = header[0].match(pattern);
 
-            /* eslint-disable hapi/no-shadow-relaxed */
             const res2 = await server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } });
 
             expect(res2.statusCode).to.equal(200);
-            /* eslint-enable hapi/no-shadow-relaxed */
         });
 
         it('throws on missing session when trying to set key', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -767,8 +745,8 @@ describe('scheme', () => {
 
         it('throws when trying to set key with invalid input', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -803,8 +781,8 @@ describe('scheme', () => {
 
         it('throws when trying to set key with null key', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -842,8 +820,8 @@ describe('scheme', () => {
 
         it('clear a specific session key', async (done) => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -882,17 +860,15 @@ describe('scheme', () => {
             expect(header[0]).to.contain('Max-Age=60');
             const cookie = header[0].match(pattern);
 
-            /* eslint-disable hapi/no-shadow-relaxed */
             const res2 = await server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } });
 
             expect(res2.statusCode).to.equal(200);
-            /* eslint-enable hapi/no-shadow-relaxed */
         });
 
         it('throws when trying to clear a key on missing session', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -927,8 +903,8 @@ describe('scheme', () => {
 
         it('throws when trying to clear a key with invalid input', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -963,8 +939,8 @@ describe('scheme', () => {
 
         it('throws when trying to clear a key with null input', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1002,8 +978,8 @@ describe('scheme', () => {
 
         it('overrides ttl', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1043,11 +1019,9 @@ describe('scheme', () => {
             expect(header[0]).to.contain('Max-Age=60');
             const cookie = header[0].match(pattern);
 
-            /* eslint-disable hapi/no-shadow-relaxed */
             const res2 = await server.inject({ method: 'GET', url: '/ttl', headers: { cookie: 'special=' + cookie[1] } });
 
             expect(res2.statusCode).to.equal(200);
-            /* eslint-enable hapi/no-shadow-relaxed */
         });
     });
 
@@ -1055,8 +1029,8 @@ describe('scheme', () => {
 
         it('sends to login page (uri without query)', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1081,8 +1055,8 @@ describe('scheme', () => {
 
         it('sends to login page when redirectTo is a function', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1107,8 +1081,8 @@ describe('scheme', () => {
 
         it('skips when redirectTo is set to false', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1134,8 +1108,8 @@ describe('scheme', () => {
 
         it('skips when route override', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1168,8 +1142,8 @@ describe('scheme', () => {
 
         it('skips when redirectOnTry is false in try mode', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1200,8 +1174,8 @@ describe('scheme', () => {
 
         it('sends to login page (uri with query)', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1226,8 +1200,8 @@ describe('scheme', () => {
 
         it('sends to login page and does not append the next query when appendNext is false', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1252,8 +1226,8 @@ describe('scheme', () => {
 
         it('appends the custom query when appendNext is string', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1278,8 +1252,8 @@ describe('scheme', () => {
 
         it('redirect on try', async () => {
 
-            const server = new Hapi.Server();
-            server.register(require('../'));
+            const server = Hapi.server();
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
                 password: 'password-should-be-32-characters',
@@ -1304,8 +1278,8 @@ describe('scheme', () => {
 
     it('clear cookie on invalid', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
             password: 'password-should-be-32-characters',
@@ -1324,10 +1298,10 @@ describe('scheme', () => {
         expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Path=/');
     });
 
-    it('supports many strategies', () => {
+    it('supports many strategies', async () => {
 
-        const server = new Hapi.Server();
-        server.register(require('../'));
+        const server = Hapi.server();
+        await server.register(require('../'));
 
         expect(() => {
 
