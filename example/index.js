@@ -12,7 +12,7 @@ const users = {
     }
 };
 
-const home = function (request, h) {
+const home = (request, h) => {
 
     return '<html><head><title>Login page</title></head><body><h3>Welcome ' +
       request.auth.credentials.name +
@@ -66,7 +66,7 @@ const login = async (request, h) => {
     return h.redirect('/');
 };
 
-const logout = function (request, h) {
+const logout = (request, h) => {
 
     request.cookieAuth.clear();
     return h.redirect('/');
@@ -86,7 +86,7 @@ exports.start = async () => {
         cookie: 'sid-example',
         redirectTo: '/login',
         isSecure: false,
-        validateFunc: async function (request, session) {
+        validateFunc: async (request, session) => {
 
             const cached = await cache.get(session.sid);
             const out = {
