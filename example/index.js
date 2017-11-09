@@ -114,9 +114,7 @@ exports.start = async () => {
     console.log('Server ready');
 };
 
-try {
-    exports.start();
-}
-catch (err) {
+exports.start().catch((err) => {
     console.log(err.stack);
-}
+    process.exit(1);
+});
