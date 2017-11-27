@@ -43,7 +43,7 @@ The `'cookie`' scheme takes the following options:
   a different parameter name. Defaults to `false`.
 - `redirectOnTry` - if `false` and route authentication mode is `'try'`, authentication errors will
   not trigger a redirection. Defaults to `true`;
-- `await validateFunc` - an optional session validation function used to validate the content of the
+- `async validateFunc` - an optional session validation function used to validate the content of the
   session cookie on each request. Used to verify that the internal session state is still valid
   (e.g. user account still exists). The function has the signature `function(request, session)`
   where:
