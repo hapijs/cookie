@@ -1,6 +1,7 @@
 'use strict';
 
 const Hapi = require('hapi');
+const internals = {};
 
 let uuid = 1;       // Use seq instead of proper unique identifiers for demo only
 
@@ -111,11 +112,18 @@ exports.start = async () => {
 
     await server.start();
 
-    console.log('Server ready');
+    console.log(`Server started at: ${server.info.uri}`);
 };
 
-exports.start().catch((err) => {
+internals.start = async function () {
 
-    console.log(err.stack);
-    process.exit(1);
-});
+    try {
+        await exports.start();
+    }
+    catch (err) {
+        console.error(err.stack);
+        process.exit(1);
+    }
+};
+
+internals.start();

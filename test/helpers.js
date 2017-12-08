@@ -9,7 +9,7 @@ exports.loginWithResourceEndpoint = (server) => {
             handler: function (request, h) {
 
                 request.cookieAuth.set({ user: request.params.user });
-                return h.response(request.params.user);
+                return request.params.user;
             }
         }
     });
@@ -17,7 +17,7 @@ exports.loginWithResourceEndpoint = (server) => {
     server.route({
         method: 'GET', path: '/resource', handler: function (request, h) {
 
-            return h.response('resource');
+            return 'resource';
         }
     });
 };
