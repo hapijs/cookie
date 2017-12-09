@@ -42,20 +42,19 @@ The `'cookie`' scheme takes the following options:
   query component of the `redirectTo` URI using the parameter name `'next'`. Set to a string to use
   a different parameter name. Defaults to `false`.
 - `redirectOnTry` - if `false` and route authentication mode is `'try'`, authentication errors will
-  not trigger a redirection. Requires **hapi** version 6.2.0 or newer. Defaults to `true`;
-- `validateFunc` - an optional session validation function used to validate the content of the
+  not trigger a redirection. Defaults to `true`;
+- `async validateFunc` - an optional session validation function used to validate the content of the
   session cookie on each request. Used to verify that the internal session state is still valid
-  (e.g. user account still exists). The function has the signature `function(request, session, callback)`
+  (e.g. user account still exists). The function has the signature `function(request, session)`
   where:
     - `request` - is the Hapi request object of the request which is being authenticated.
     - `session` - is the session object set via `request.cookieAuth.set()`.
-    - `callback` - a callback function with the signature `function(err, isValid, credentials)`
-      where:
-        - `err` - an internal error.
-        - `isValid` - `true` if the content of the session is valid, otherwise `false`.
-        - `credentials` - a credentials object passed back to the application in
-          `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
-          set, will override the current cookie as if `request.cookieAuth.set()` was called.
+
+  Must return an object that contains:
+    - `valid` - `true` if the content of the session is valid, otherwise `false`.
+    - `credentials` - a credentials object passed back to the application in
+      `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
+      set, will override the current cookie as if `request.cookieAuth.set()` was called.
 - `requestDecoratorName` - *USE WITH CAUTION* an optional name to use with decorating the `request` object.  Defaults to `'cookieAuth'`.  Using multiple decorator names for separate authentication strategies could allow a developer to call the methods for the wrong strategy.  Potentially resulting in unintended authorized access.
 
 When the cookie scheme is enabled on a route, the `request.cookieAuth` objects is decorated with
@@ -81,6 +80,7 @@ registered more than once.
 'use strict';
 
 const Hapi = require('hapi');
+const internals = {};
 
 let uuid = 1;       // Use seq instead of proper unique identifiers for demo only
 
@@ -92,19 +92,19 @@ const users = {
     }
 };
 
-const home = function (request, reply) {
+const home = (request, h) => {
 
-    reply('<html><head><title>Login page</title></head><body><h3>Welcome ' +
+    return '<html><head><title>Login page</title></head><body><h3>Welcome ' +
       request.auth.credentials.name +
       '!</h3><br/><form method="get" action="/logout">' +
       '<input type="submit" value="Logout">' +
-      '</form></body></html>');
+      '</form></body></html>';
 };
 
-const login = function (request, reply) {
+const login = async (request, h) => {
 
     if (request.auth.isAuthenticated) {
-        return reply.redirect('/');
+        return h.redirect('/');
     }
 
     let message = '';
@@ -130,65 +130,58 @@ const login = function (request, reply) {
     if (request.method === 'get' ||
         message) {
 
-        return reply('<html><head><title>Login page</title></head><body>' +
+        return '<html><head><title>Login page</title></head><body>' +
             (message ? '<h3>' + message + '</h3><br/>' : '') +
             '<form method="post" action="/login">' +
             'Username: <input type="text" name="username"><br>' +
             'Password: <input type="password" name="password"><br/>' +
-            '<input type="submit" value="Login"></form></body></html>');
+            '<input type="submit" value="Login"></form></body></html>';
     }
 
     const sid = String(++uuid);
-    request.server.app.cache.set(sid, { account: account }, 0, (err) => {
 
-        if (err) {
-            reply(err);
-        }
+    await request.server.app.cache.set(sid, { account }, 0);
+    request.cookieAuth.set({ sid });
 
-        request.cookieAuth.set({ sid: sid });
-        return reply.redirect('/');
-    });
+    return h.redirect('/');
 };
 
-const logout = function (request, reply) {
+const logout = (request, h) => {
 
     request.cookieAuth.clear();
-    return reply.redirect('/');
+    return h.redirect('/');
 };
 
-const server = new Hapi.Server();
-server.connection({ port: 8000 });
+const server = Hapi.server({ port: 8000 });
 
-server.register(require('../'), (err) => {
+exports.start = async () => {
 
-    if (err) {
-        throw err;
-    }
+    await server.register(require('../'));
 
     const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;
 
-    server.auth.strategy('session', 'cookie', true, {
+    server.auth.strategy('session', 'cookie', {
         password: 'password-should-be-32-characters',
         cookie: 'sid-example',
         redirectTo: '/login',
         isSecure: false,
-        validateFunc: function (request, session, callback) {
+        validateFunc: async (request, session) => {
 
-            cache.get(session.sid, (err, cached) => {
+            const cached = await cache.get(session.sid);
+            const out = {
+                valid: !!cached
+            };
 
-                if (err) {
-                    return callback(err, false);
-                }
+            if (out.valid) {
+                out.credentials = cached.account;
+            }
 
-                if (!cached) {
-                    return callback(null, false);
-                }
-
-                return callback(null, true, cached.account);
-            });
+            return out;
         }
     });
+
+    server.auth.default('session');
 
     server.route([
         { method: 'GET', path: '/', config: { handler: home } },
@@ -196,9 +189,21 @@ server.register(require('../'), (err) => {
         { method: 'GET', path: '/logout', config: { handler: logout } }
     ]);
 
-    server.start(() => {
+    await server.start();
 
-        console.log('Server ready');
-    });
-});
+    console.log(`Server started at: ${server.info.uri}`);
+};
+
+internals.start = async function () {
+
+    try {
+        await exports.start();
+    }
+    catch (err) {
+        console.error(err.stack);
+        process.exit(1);
+    }
+};
+
+internals.start();
 ```
