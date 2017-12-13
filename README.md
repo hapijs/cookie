@@ -36,7 +36,7 @@ The `'cookie`' scheme takes the following options:
 - `redirectTo` - optional login URI to redirect unauthenticated requests to. Note that using
   `redirectTo` with authentication mode `'try'` will cause the protected endpoint to always
   redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use
-  the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
+  the route `plugins` config (`{ options: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
   Defaults to no redirection.
 - `appendNext` - if `true` and `redirectTo` is `true`, appends the current request path to the
   query component of the `redirectTo` URI using the parameter name `'next'`. Set to a string to use
@@ -184,9 +184,9 @@ exports.start = async () => {
     server.auth.default('session');
 
     server.route([
-        { method: 'GET', path: '/', config: { handler: home } },
-        { method: ['GET', 'POST'], path: '/login', config: { handler: login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
-        { method: 'GET', path: '/logout', config: { handler: logout } }
+        { method: 'GET', path: '/', options: { handler: home } },
+        { method: ['GET', 'POST'], path: '/login', options: { handler: login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
+        { method: 'GET', path: '/logout', options: { handler: logout } }
     ]);
 
     await server.start();
