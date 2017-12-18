@@ -1106,6 +1106,33 @@ describe('scheme', () => {
             expect(res.statusCode).to.equal(401);
         });
 
+        it('skips when redirectTo is set to function that returns falsey value', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: () => false,
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, h) {
+
+                    return h.response('never');
+                }
+            });
+
+            const res = await server.inject('/');
+
+            expect(res.statusCode).to.equal(401);
+        });
+
         it('skips when route override', async () => {
 
             const server = Hapi.server();
