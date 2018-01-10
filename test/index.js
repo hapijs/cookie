@@ -1218,7 +1218,33 @@ describe('scheme', () => {
             expect(res.headers.location).to.equal('http://example.com/login?mode=1&done=%2F');
         });
 
-        it('redirect on try', async () => {
+        it('redirect for required mode', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login',
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/', config: { auth: { mode: 'required' } }, handler: function (request, h) {
+
+                    return h.response('required');
+                }
+            });
+
+            const res = await server.inject('/');
+
+            expect(res.statusCode).to.equal(302);
+            expect(res.headers.location).to.equal('http://example.com/login?next=%2F');
+        });
+
+        it('skips redirect for try mode', async () => {
 
             const server = Hapi.server();
             await server.register(require('../'));
@@ -1240,7 +1266,32 @@ describe('scheme', () => {
 
             const res = await server.inject('/');
 
-            expect(res.statusCode).to.equal(302);
+            expect(res.statusCode).to.equal(200);
+        });
+
+        it('skips redirect for optional mode', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login',
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/', config: { auth: { mode: 'optional' } }, handler: function (request, h) {
+
+                    return h.response('optional');
+                }
+            });
+
+            const res = await server.inject('/');
+
+            expect(res.statusCode).to.equal(200);
         });
     });
 
