@@ -1140,38 +1140,6 @@ describe('scheme', () => {
             expect(res.statusCode).to.equal(401);
         });
 
-        it('skips when redirectOnTry is false in try mode', async () => {
-
-            const server = Hapi.server();
-            await server.register(require('../'));
-
-            server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                redirectOnTry: false,
-                redirectTo: 'http://example.com/login',
-                appendNext: true
-            });
-            server.auth.default({
-                mode: 'try',
-                strategy: 'default'
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/',
-                handler: function (request, h) {
-
-                    return h.response(request.auth.isAuthenticated);
-                }
-            });
-
-            const res = await server.inject('/');
-
-            expect(res.statusCode).to.equal(200);
-            expect(res.result).to.equal(false);
-        });
-
         it('sends to login page (uri with query)', async () => {
 
             const server = Hapi.server();
