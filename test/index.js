@@ -421,6 +421,7 @@ describe('scheme', () => {
             ttl: 60 * 1000,
             cookie: 'first',
             validateFunc: function (request, session) {
+
                 throw Boom.unauthorized(null, 'first');
             }
         });
