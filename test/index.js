@@ -458,14 +458,13 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
 
-        server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'first=' + cookie[1] } }, (res2) => {
+        const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'first=' + cookie[1] } });
 
-            expect(res2.statusCode).to.equal(200);
-            expect(res2.headers['set-cookie']).to.not.exist();
-            expect(res2.result).to.equal('valid-resource');
-            expect(res2.request.auth.isAuthenticated).to.be.true();
-            expect(res2.request.auth.credentials.user).to.equal('bogus-user');
-        });
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.headers['set-cookie']).to.not.exist();
+        expect(res2.result).to.equal('valid-resource');
+        expect(res2.request.auth.isAuthenticated).to.be.true();
+        expect(res2.request.auth.credentials.user).to.equal('bogus-user');
     });
 
     it('authenticates a request (no ttl)', async () => {
