@@ -148,6 +148,7 @@ const login = async (request, h) => {
 
 const logout = (request, h) => {
 
+    request.server.app.cache.drop(request.state['sid-example'].sid);
     request.cookieAuth.clear();
     return h.redirect('/');
 };
