@@ -2,6 +2,7 @@
 
 // Load modules
 
+const Boom = require('boom');
 const Hapi = require('hapi');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -391,6 +392,79 @@ describe('scheme', () => {
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(401);
+    });
+
+    it('uauthorized error in validation function fails over to subsequent authentication scheme', async () => {
+
+        const plugin = {
+            name: 'bogusAuth',
+            register: (server, options) => {
+
+                const schema = () => {
+
+                    return {
+                        authenticate: (request, reply) => {
+
+                            return reply.authenticated({ credentials: { user: 'bogus-user' } });
+                        }
+                    };
+                };
+                server.auth.scheme('bogus', schema);
+            }
+        };
+
+        const server = Hapi.server();
+        await server.register(require('../'));
+        await server.register(plugin);
+        server.auth.strategy('first', 'cookie', {
+            password: 'password-should-be-32-characters',
+            ttl: 60 * 1000,
+            cookie: 'first',
+            validateFunc: function (request, session) {
+
+                throw Boom.unauthorized(null, 'first');
+            }
+        });
+
+        server.auth.strategy('second', 'bogus');
+
+        server.route({
+            method: 'GET', path: '/login/{user}',
+            config: {
+                handler: function (request, reply) {
+
+                    request.cookieAuth.set({ user: request.params.user });
+                    return reply.response(request.params.user);
+                }
+            }
+        });
+
+        server.route({
+            method: 'GET', path: '/resource',
+            config: {
+                auth: { mode: 'required', strategies: ['first', 'second'] },
+                handler: function (request, reply) {
+
+                    return reply.response('valid-resource');
+                }
+            }
+        });
+
+        const res = await server.inject('/login/bob');
+
+        expect(res.result).to.equal('bob');
+        const header = res.headers['set-cookie'];
+        expect(header.length).to.equal(1);
+        expect(header[0]).to.contain('Max-Age=60');
+        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+
+        const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'first=' + cookie[1] } });
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.headers['set-cookie']).to.not.exist();
+        expect(res2.result).to.equal('valid-resource');
+        expect(res2.request.auth.isAuthenticated).to.be.true();
+        expect(res2.request.auth.credentials.user).to.equal('bogus-user');
     });
 
     it('authenticates a request (no ttl)', async () => {
@@ -1088,6 +1162,33 @@ describe('scheme', () => {
                 password: 'password-should-be-32-characters',
                 ttl: 60 * 1000,
                 redirectTo: false,
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, h) {
+
+                    return h.response('never');
+                }
+            });
+
+            const res = await server.inject('/');
+
+            expect(res.statusCode).to.equal(401);
+        });
+
+        it('skips when redirectTo is set to function that returns falsey value', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: () => false,
                 appendNext: true
             });
             server.auth.default('default');
