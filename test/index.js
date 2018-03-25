@@ -403,9 +403,9 @@ describe('scheme', () => {
                 const schema = () => {
 
                     return {
-                        authenticate: (request, reply) => {
+                        authenticate: (request, h) => {
 
-                            return reply.authenticated({ credentials: { user: 'bogus-user' } });
+                            return h.authenticated({ credentials: { user: 'bogus-user' } });
                         }
                     };
                 };
@@ -431,10 +431,10 @@ describe('scheme', () => {
         server.route({
             method: 'GET', path: '/login/{user}',
             config: {
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
                     request.cookieAuth.set({ user: request.params.user });
-                    return reply.response(request.params.user);
+                    return h.response(request.params.user);
                 }
             }
         });
@@ -443,9 +443,9 @@ describe('scheme', () => {
             method: 'GET', path: '/resource',
             config: {
                 auth: { mode: 'required', strategies: ['first', 'second'] },
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
-                    return reply.response('valid-resource');
+                    return h.response('valid-resource');
                 }
             }
         });
@@ -1255,9 +1255,9 @@ describe('scheme', () => {
             server.auth.default('default');
 
             server.route({
-                method: 'GET', path: '/', handler: function (request, reply) {
+                method: 'GET', path: '/', handler: function () {
 
-                    return reply('never');
+                    return 'never';
                 }
             });
 
