@@ -403,9 +403,9 @@ describe('scheme', () => {
                 const schema = () => {
 
                     return {
-                        authenticate: (request, reply) => {
+                        authenticate: (request, h) => {
 
-                            return reply.authenticated({ credentials: { user: 'bogus-user' } });
+                            return h.authenticated({ credentials: { user: 'bogus-user' } });
                         }
                     };
                 };
@@ -431,10 +431,10 @@ describe('scheme', () => {
         server.route({
             method: 'GET', path: '/login/{user}',
             config: {
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
                     request.cookieAuth.set({ user: request.params.user });
-                    return reply.response(request.params.user);
+                    return h.response(request.params.user);
                 }
             }
         });
@@ -443,9 +443,9 @@ describe('scheme', () => {
             method: 'GET', path: '/resource',
             config: {
                 auth: { mode: 'required', strategies: ['first', 'second'] },
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
-                    return reply.response('valid-resource');
+                    return h.response('valid-resource');
                 }
             }
         });
@@ -1241,38 +1241,6 @@ describe('scheme', () => {
             expect(res.statusCode).to.equal(401);
         });
 
-        it('skips when redirectOnTry is false in try mode', async () => {
-
-            const server = Hapi.server();
-            await server.register(require('../'));
-
-            server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                redirectOnTry: false,
-                redirectTo: 'http://example.com/login',
-                appendNext: true
-            });
-            server.auth.default({
-                mode: 'try',
-                strategy: 'default'
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/',
-                handler: function (request, h) {
-
-                    return h.response(request.auth.isAuthenticated);
-                }
-            });
-
-            const res = await server.inject('/');
-
-            expect(res.statusCode).to.equal(200);
-            expect(res.result).to.equal(false);
-        });
-
         it('sends to login page (uri with query)', async () => {
 
             const server = Hapi.server();
@@ -1287,9 +1255,9 @@ describe('scheme', () => {
             server.auth.default('default');
 
             server.route({
-                method: 'GET', path: '/', handler: function (request, reply) {
+                method: 'GET', path: '/', handler: function () {
 
-                    return reply('never');
+                    return 'never';
                 }
             });
 
@@ -1351,7 +1319,33 @@ describe('scheme', () => {
             expect(res.headers.location).to.equal('http://example.com/login?mode=1&done=%2F');
         });
 
-        it('redirect on try', async () => {
+        it('redirect for required mode', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login',
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/', config: { auth: { mode: 'required' } }, handler: function (request, h) {
+
+                    return h.response('required');
+                }
+            });
+
+            const res = await server.inject('/');
+
+            expect(res.statusCode).to.equal(302);
+            expect(res.headers.location).to.equal('http://example.com/login?next=%2F');
+        });
+
+        it('skips redirect for try mode', async () => {
 
             const server = Hapi.server();
             await server.register(require('../'));
@@ -1373,7 +1367,32 @@ describe('scheme', () => {
 
             const res = await server.inject('/');
 
-            expect(res.statusCode).to.equal(302);
+            expect(res.statusCode).to.equal(200);
+        });
+
+        it('skips redirect for optional mode', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                redirectTo: 'http://example.com/login',
+                appendNext: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/', config: { auth: { mode: 'optional' } }, handler: function (request, h) {
+
+                    return h.response('optional');
+                }
+            });
+
+            const res = await server.inject('/');
+
+            expect(res.statusCode).to.equal(200);
         });
     });
 

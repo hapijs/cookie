@@ -33,16 +33,13 @@ The `'cookie`' scheme takes the following options:
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
   exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
-- `redirectTo` - optional login URI or function `function(request)` that returns a URI to redirect unauthenticated requests to. Note that using
-  `redirectTo` with authentication mode `'try'` will cause the protected endpoint to always
-  redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use
-  the route `plugins` config (`{ options: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
+- `redirectTo` - optional login URI or function `function(request)` that returns a URI to redirect unauthenticated requests to. Note that it will only
+  trigger when the authentication mode is `'required'`. To enable or disable redirections for a specific route,
+  set the route `plugins` config (`{ options: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
   Defaults to no redirection.
 - `appendNext` - if `true` and `redirectTo` is `true`, appends the current request path to the
   query component of the `redirectTo` URI using the parameter name `'next'`. Set to a string to use
   a different parameter name. Defaults to `false`.
-- `redirectOnTry` - if `false` and route authentication mode is `'try'`, authentication errors will
-  not trigger a redirection. Defaults to `true`;
 - `async validateFunc` - an optional session validation function used to validate the content of the
   session cookie on each request. Used to verify that the internal session state is still valid
   (e.g. user account still exists). The function has the signature `function(request, session)`
