@@ -38,9 +38,14 @@ The `'cookie`' scheme takes the following options:
   redirect, voiding `'try'` mode. To set an individual route to use or disable redirections, use
   the route `plugins` config (`{ config: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
   Defaults to no redirection.
-- `appendNext` - if `true` and `redirectTo` is `true`, appends the current request path to the
-  query component of the `redirectTo` URI using the parameter name `'next'`. Set to a string to use
-  a different parameter name. Defaults to `false`.
+- `appendNext` - if `redirectTo` is `true`, can be a boolean, string, or object. Defaults to `false`.
+    - if set to `true`, a string, or an object, appends the current request path to the query component
+      of the `redirectTo` URI
+    - set to a string value or set the `name` property in an object to define the parameter name.
+      defaults to `'next'`
+    - set the `raw` property of the object to `true` to determine the current request path based on
+      the raw node.js request object received from the HTTP server callback instead of the processed
+      hapi request object
 - `redirectOnTry` - if `false` and route authentication mode is `'try'`, authentication errors will
   not trigger a redirection. Requires **hapi** version 6.2.0 or newer. Defaults to `true`;
 - `validateFunc` - an optional session validation function used to validate the content of the
