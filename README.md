@@ -33,6 +33,7 @@ The `'cookie`' scheme takes the following options:
 - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
   exposes it to attacks. Defaults to `true`.
 - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
+- `encoding` - How the cookie will be encoded. This is passed to the encoding option of [server.state(..)](https://hapijs.com/api#-serverstatename-options). Defaults to `iron`, which causes the cookie to be encrypted and signed.
 - `redirectTo` - optional login URI or function `function(request)` that returns a URI to redirect unauthenticated requests to. Note that it will only
   trigger when the authentication mode is `'required'`. To enable or disable redirections for a specific route,
   set the route `plugins` config (`{ options: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
@@ -57,10 +58,10 @@ The `'cookie`' scheme takes the following options:
 When the cookie scheme is enabled on a route, the `request.cookieAuth` objects is decorated with
 the following methods:
 - `set(session)` - sets the current session. Must be called after a successful login to begin the
-  session. `session` must be a non-null object, which is set on successful subsequent
+  session. `session` must be truthy, it will be set on successful subsequent
   authentications in `request.auth.credentials` where:
-    - `session` - the session object.
-- `set(key, value)` - sets a specific object key on the current session (which must already exist)
+    - `session` - the session.
+- `set(key, value)` - sets a specific object key on the current session (which must be an object and must already exist).
   where:
     - `key` - session key string.
     - `value` - value to assign key.

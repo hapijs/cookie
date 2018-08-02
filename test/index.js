@@ -84,6 +84,20 @@ describe('scheme', () => {
         }).to.throw(Error);
     });
 
+    it('allows encoding option to be set', async () => {
+
+        const server = Hapi.server();
+        await server.register(require('../'));
+
+        expect(() => {
+
+            server.auth.strategy('session', 'cookie', {
+                password: 'password-should-be-32-characters',
+                encoding: 'none'
+            });
+        }).not.to.throw();
+    });
+
     it('authenticates a request', async () => {
 
         const server = Hapi.server();
@@ -734,6 +748,35 @@ describe('scheme', () => {
             expect(res.result).to.equal('Invalid session');
         });
 
+        it('allows strings as sessions', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, h) {
+
+                        request.cookieAuth.set('token');
+                        return h.response('ok');
+                    }
+                }
+            });
+
+            const res = await server.inject('/login/steve');
+            expect(res.statusCode).to.equal(200);
+        });
+
         it('sets individual cookie key', async () => {
 
             const server = Hapi.server();
@@ -779,6 +822,57 @@ describe('scheme', () => {
             const res2 = await server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } });
 
             expect(res2.statusCode).to.equal(200);
+        });
+
+        it('disallows setting keys on non-object sessions', async () => {
+
+            const server = Hapi.server();
+            await server.register(require('../'));
+
+            server.auth.strategy('default', 'cookie', {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                cookie: 'special',
+                clearInvalid: true
+            });
+            server.auth.default('default');
+
+            server.route({
+                method: 'GET', path: '/login/{user}',
+                config: {
+                    auth: { mode: 'try' },
+                    handler: function (request, h) {
+
+                        request.cookieAuth.set('token');
+                        return h.response('ok');
+                    }
+                }
+            });
+
+            server.route({
+                method: 'GET', path: '/setKey', handler: function (request, h) {
+
+                    try {
+                        request.cookieAuth.set('key', 'value');
+                    }
+                    catch (error) {
+                        return h.response(error.message);
+                    }
+
+                    return h.response('ok');
+                }
+            });
+
+            const res = await server.inject('/login/andreas');
+
+            const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+            expect(res.result).to.equal('ok');
+            const header = res.headers['set-cookie'];
+            const cookie = header[0].match(pattern);
+
+            const res2 = await server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } });
+
+            expect(res2.result).to.equal('Session is not a object and thus does not support setting keys');
         });
 
         it('throws on missing session when trying to set key', async () => {
