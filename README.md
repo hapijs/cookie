@@ -4,7 +4,7 @@
 
 [![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-cookie.png)](http://travis-ci.org/hapijs/hapi-auth-cookie)
 
-Lead Maintainer: [Julian Lannigan](https://github.com/mrlannigan)
+Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
 
 Cookie authentication provides simple cookie-based session management. The user has to be
 authenticated via other means, typically a web form, and upon successful authentication
