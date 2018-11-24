@@ -1,26 +1,18 @@
 'use strict';
 
-// Load modules
-
 const Boom = require('boom');
 const Hapi = require('hapi');
 const Hoek = require('hoek');
 const Lab = require('lab');
 
+const Helpers = require('./helpers');
 
-// Declare internals
 
 const internals = {};
 
 
-// Test shortcuts
-
 const lab = exports.lab = Lab.script();
 const { describe, it, expect } = lab;
-
-
-// Helpers
-const Helpers = require('./helpers');
 
 
 describe('scheme', () => {
@@ -409,6 +401,7 @@ describe('scheme', () => {
                         }
                     };
                 };
+
                 server.auth.scheme('bogus', schema);
             }
         };

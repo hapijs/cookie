@@ -1,11 +1,14 @@
 'use strict';
 
 const Hapi = require('hapi');
-const internals = {};
 
-let uuid = 1;       // Use seq instead of proper unique identifiers for demo only
 
-const users = {
+const internals = {
+    uuid: 1             // Use seq instead of proper unique identifiers for demo only
+};
+
+
+internals.users = {
     john: {
         id: 'john',
         password: 'password',
@@ -13,16 +16,18 @@ const users = {
     }
 };
 
-const home = (request, h) => {
+
+internals.home = function (request, h) {
 
     return '<html><head><title>Login page</title></head><body><h3>Welcome ' +
-      request.auth.credentials.name +
-      '!</h3><br/><form method="get" action="/logout">' +
-      '<input type="submit" value="Logout">' +
-      '</form></body></html>';
+        request.auth.credentials.name +
+        '!</h3><br/><form method="get" action="/logout">' +
+        '<input type="submit" value="Logout">' +
+        '</form></body></html>';
 };
 
-const login = async (request, h) => {
+
+internals.login = async function (request, h) {
 
     if (request.auth.isAuthenticated) {
         return h.redirect('/');
@@ -39,7 +44,7 @@ const login = async (request, h) => {
             message = 'Missing username or password';
         }
         else {
-            account = users[request.payload.username];
+            account = internals.users[request.payload.username];
             if (!account ||
                 account.password !== request.payload.password) {
 
@@ -59,7 +64,7 @@ const login = async (request, h) => {
             '<input type="submit" value="Login"></form></body></html>';
     }
 
-    const sid = String(++uuid);
+    const sid = String(++internals.uuid);
 
     await request.server.app.cache.set(sid, { account }, 0);
     request.cookieAuth.set({ sid });
@@ -67,17 +72,18 @@ const login = async (request, h) => {
     return h.redirect('/');
 };
 
-const logout = (request, h) => {
+
+internals.logout = function (request, h) {
 
     request.server.app.cache.drop(request.state['sid-example'].sid);
     request.cookieAuth.clear();
     return h.redirect('/');
 };
 
-const server = Hapi.server({ port: 8000 });
 
-exports.start = async () => {
+internals.start = async function () {
 
+    const server = Hapi.server({ port: 8000 });
     await server.register(require('../'));
 
     const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
@@ -106,25 +112,14 @@ exports.start = async () => {
     server.auth.default('session');
 
     server.route([
-        { method: 'GET', path: '/', config: { handler: home } },
-        { method: ['GET', 'POST'], path: '/login', config: { handler: login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
-        { method: 'GET', path: '/logout', config: { handler: logout } }
+        { method: 'GET', path: '/', config: { handler: internals.home } },
+        { method: ['GET', 'POST'], path: '/login', config: { handler: internals.login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
+        { method: 'GET', path: '/logout', config: { handler: internals.logout } }
     ]);
 
     await server.start();
 
     console.log(`Server started at: ${server.info.uri}`);
-};
-
-internals.start = async function () {
-
-    try {
-        await exports.start();
-    }
-    catch (err) {
-        console.error(err.stack);
-        process.exit(1);
-    }
 };
 
 internals.start();

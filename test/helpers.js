@@ -1,5 +1,6 @@
 'use strict';
 
+
 exports.loginWithResourceEndpoint = (server) => {
 
     server.route({
