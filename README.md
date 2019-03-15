@@ -19,20 +19,21 @@ It is important to remember a couple of things:
 
 The `'cookie`' scheme takes the following options:
 
-- `cookie` - the cookie name. Defaults to `'sid'`.
-- `password` - used for Iron cookie encoding. Should be at least 32 characters long.
-- `ttl` - sets the cookie expires time in milliseconds. Defaults to single browser session (ends
-  when browser closes). Required when `keepAlive` is `true`.
-- `domain` - sets the cookie Domain value. Defaults to none.
-- `path` - sets the cookie path value. Defaults to `/`.
-- `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as
-  expired in the response and cleared. Defaults to `false`.
+- `cookie` - an object with the following:
+  - `name` - the cookie name. Defaults to `'sid'`.
+  - `password` - used for Iron cookie encoding. Should be at least 32 characters long.
+  - `ttl` - sets the cookie expires time in milliseconds. Defaults to single browser session (ends
+    when browser closes). Required when `keepAlive` is `true`.
+  - `domain` - sets the cookie Domain value. Defaults to none.
+  - `path` - sets the cookie path value. Defaults to none.
+  - `clearInvalid` - if `true`, any authentication cookie that fails validation will be marked as
+    expired in the response and cleared. Defaults to `false`.
+  - `isSameSite` - if `false` omitted. Other options `Strict` or `Lax`. Defaults to `Strict`.
+  - `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
+    exposes it to attacks. Defaults to `true`.
+  - `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
 - `keepAlive` - if `true`, automatically sets the session cookie after validation to extend the
   current session for a new `ttl` duration. Defaults to `false`.
-- `isSameSite` - if `false` omitted. Other options `Strict` or `Lax`. Defaults to `Strict`.
-- `isSecure` - if `false`, the cookie is allowed to be transmitted over insecure connections which
-  exposes it to attacks. Defaults to `true`.
-- `isHttpOnly` - if `false`, the cookie will not include the 'HttpOnly' flag. Defaults to `true`.
 - `redirectTo` - optional login URI or function `function(request)` that returns a URI to redirect unauthenticated requests to. Note that it will only
   trigger when the authentication mode is `'required'`. To enable or disable redirections for a specific route,
   set the route `plugins` config (`{ options: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
@@ -133,14 +134,17 @@ internals.server = async function () {
 
     server.auth.strategy('session', 'cookie', {
 
-        // Don't forget to change it to your own secret password!
-        password: 'password-should-be-32-characters',
+        cookie: {
+            name: 'sid-example',
 
-        cookie: 'sid-example',
+            // Don't forget to change it to your own secret password!
+            password: 'password-should-be-32-characters',
+
+            // For working via HTTP in localhost
+            isSecure: false
+        },
+
         redirectTo: '/login',
-
-         // For working via HTTP in localhost
-        isSecure: false,
 
         validateFunc: async (request, session) => {
 

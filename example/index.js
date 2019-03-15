@@ -90,10 +90,12 @@ internals.start = async function () {
     server.app.cache = cache;
 
     server.auth.strategy('session', 'cookie', {
-        password: 'password-should-be-32-characters',
-        cookie: 'sid-example',
+        cookie: {
+            name: 'sid-example',
+            password: 'password-should-be-32-characters',
+            isSecure: false
+        },
         redirectTo: '/login',
-        isSecure: false,
         validateFunc: async (request, session) => {
 
             const cached = await cache.get(session.sid);
