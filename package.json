@@ -20,7 +20,7 @@
   "devDependencies": {
     "code": "5.x.x",
     "hapi": "18.x.x",
-    "lab": "16.x.x"
+    "lab": "18.x.x"
   },
   "scripts": {
     "test": "lab -a code -t 100 -L",

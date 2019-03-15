@@ -25,7 +25,7 @@ describe('scheme', () => {
         expect(() => {
 
             server.auth.strategy('session', 'cookie', {});
-        }).to.throw(Error);
+        }).to.throw();
     });
 
     it('passes with a password configured', async () => {
@@ -59,7 +59,7 @@ describe('scheme', () => {
         expect(() => {
 
             server.auth.strategy('session', 'cookie', { validateFunc: 'not a function' });
-        }).to.throw(Error);
+        }).to.throw();
     });
 
     it('fails if keepAlive is configured but not ttl', async () => {
@@ -73,7 +73,7 @@ describe('scheme', () => {
                 password: 'password-should-be-32-characters',
                 keepAlive: true
             });
-        }).to.throw(Error);
+        }).to.throw();
     });
 
     it('authenticates a request', async () => {
@@ -167,7 +167,7 @@ describe('scheme', () => {
         server.route({
             method: 'GET',
             path: '/multiple',
-            config: {
+            options: {
                 auth: {
                     mode: 'try',
                     strategies: ['default', 'simple']
@@ -212,7 +212,7 @@ describe('scheme', () => {
 
         server.route({
             method: 'GET', path: '/login/{user}',
-            config: {
+            options: {
                 auth: { mode: 'try' },
                 handler: function (request, h) {
 
@@ -423,7 +423,7 @@ describe('scheme', () => {
 
         server.route({
             method: 'GET', path: '/login/{user}',
-            config: {
+            options: {
                 handler: function (request, h) {
 
                     request.cookieAuth.set({ user: request.params.user });
@@ -434,7 +434,7 @@ describe('scheme', () => {
 
         server.route({
             method: 'GET', path: '/resource',
-            config: {
+            options: {
                 auth: { mode: 'required', strategies: ['first', 'second'] },
                 handler: function (request, h) {
 
@@ -485,7 +485,7 @@ describe('scheme', () => {
 
         server.route({
             method: 'GET', path: '/login/{user}',
-            config: {
+            options: {
                 auth: { mode: 'try' },
                 handler: function (request, h) {
 
@@ -563,7 +563,7 @@ describe('scheme', () => {
 
         server.route({
             method: 'GET', path: '/subpath/login/{user}',
-            config: {
+            options: {
                 auth: { mode: 'try' },
                 handler: function (request, h) {
 
@@ -672,23 +672,6 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
     });
 
-    it('errors if ignoreIfDecorated is false and the request object is already decorated', async () => {
-
-        const password = 'password-should-be-32-characters';
-        const ignoreIfDecorated = false;
-        const options = { password, ignoreIfDecorated };
-
-        const server = Hapi.server();
-        await server.register(require('../'));
-
-        server.auth.strategy('default', 'cookie', options);
-
-        expect(() => {
-
-            server.auth.strategy('default', 'cookie', options);
-        }).to.throw(Error);
-    });
-
     describe('set()', () => {
 
         it('errors on missing session in set()', async () => {
@@ -706,7 +689,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -742,7 +725,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -789,7 +772,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -825,7 +808,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -861,7 +844,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -900,7 +883,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -947,7 +930,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -983,7 +966,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -1019,7 +1002,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -1058,7 +1041,7 @@ describe('scheme', () => {
 
             server.route({
                 method: 'GET', path: '/login/{user}',
-                config: {
+                options: {
                     auth: { mode: 'try' },
                     handler: function (request, h) {
 
@@ -1189,9 +1172,14 @@ describe('scheme', () => {
             server.route({
                 method: 'GET',
                 path: '/',
-                handler: function (request, h) {
+                options: {
+                    plugins: {
+                        'hapi-auth-cookie': {}
+                    },
+                    handler: function (request, h) {
 
-                    return h.response('never');
+                        return h.response('never');
+                    }
                 }
             });
 
@@ -1220,7 +1208,7 @@ describe('scheme', () => {
 
                     return h.response('never');
                 },
-                config: {
+                options: {
                     plugins: {
                         'hapi-auth-cookie': {
                             redirectTo: false
@@ -1418,7 +1406,7 @@ describe('scheme', () => {
             server.auth.default('default');
 
             server.route({
-                method: 'GET', path: '/', config: { auth: { mode: 'required' } }, handler: function (request, h) {
+                method: 'GET', path: '/', options: { auth: { mode: 'required' } }, handler: function (request, h) {
 
                     return h.response('required');
                 }
@@ -1444,7 +1432,7 @@ describe('scheme', () => {
             server.auth.default('default');
 
             server.route({
-                method: 'GET', path: '/', config: { auth: { mode: 'try' } }, handler: function (request, h) {
+                method: 'GET', path: '/', options: { auth: { mode: 'try' } }, handler: function (request, h) {
 
                     return h.response('try');
                 }
@@ -1469,7 +1457,7 @@ describe('scheme', () => {
             server.auth.default('default');
 
             server.route({
-                method: 'GET', path: '/', config: { auth: { mode: 'optional' } }, handler: function (request, h) {
+                method: 'GET', path: '/', options: { auth: { mode: 'optional' } }, handler: function (request, h) {
 
                     return h.response('optional');
                 }
