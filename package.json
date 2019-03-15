@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "code": "5.x.x",
-    "hapi": "17.x.x",
+    "hapi": "18.x.x",
     "lab": "16.x.x"
   },
   "scripts": {
