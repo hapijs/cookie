@@ -84,112 +84,126 @@ registered more than once.
 const Hapi = require('hapi');
 const internals = {};
 
-let uuid = 1;       // Use seq instead of proper unique identifiers for demo only
-
-const users = {
-    john: {
-        id: 'john',
+// Simulate database for demo
+const users = [
+    {
+        id: 1,
+        name: 'john',
         password: 'password',
-        name: 'John Doe'
-    }
-};
+    },
+];
 
-const home = (request, h) => {
-
-    return '<html><head><title>Login page</title></head><body><h3>Welcome ' +
-      request.auth.credentials.name +
-      '!</h3><br/><form method="get" action="/logout">' +
-      '<input type="submit" value="Logout">' +
-      '</form></body></html>';
-};
-
-const login = async (request, h) => {
-
-    if (request.auth.isAuthenticated) {
-        return h.redirect('/');
-    }
-
-    let message = '';
-    let account = null;
-
-    if (request.method === 'post') {
-
-        if (!request.payload.username ||
-            !request.payload.password) {
-
-            message = 'Missing username or password';
-        }
-        else {
-            account = users[request.payload.username];
-            if (!account ||
-                account.password !== request.payload.password) {
-
-                message = 'Invalid username or password';
-            }
-        }
-    }
-
-    if (request.method === 'get' ||
-        message) {
-
-        return '<html><head><title>Login page</title></head><body>' +
-            (message ? '<h3>' + message + '</h3><br/>' : '') +
-            '<form method="post" action="/login">' +
-            'Username: <input type="text" name="username"><br>' +
-            'Password: <input type="password" name="password"><br/>' +
-            '<input type="submit" value="Login"></form></body></html>';
-    }
-
-    const sid = String(++uuid);
-
-    await request.server.app.cache.set(sid, { account }, 0);
-    request.cookieAuth.set({ sid });
-
-    return h.redirect('/');
-};
-
-const logout = (request, h) => {
-
-    request.server.app.cache.drop(request.state['sid-example'].sid);
-    request.cookieAuth.clear();
-    return h.redirect('/');
+const renderHtml = {
+    login: (message) => {
+        return `
+    <html><head><title>Login page</title></head><body>
+    ${message ? '<h3>' + message + '</h3><br/>' : ''}
+    <form method="post" action="/login">
+      Username: <input type="text" name="username"><br>
+      Password: <input type="password" name="password"><br/>
+    <input type="submit" value="Login"></form>
+    </body></html>
+  `;
+    },
+    home: (name) => {
+        return `
+    <html><head><title>Login page</title></head><body>
+    <h3>Welcome ${name}! You are logged in!</h3>
+    <form method="get" action="/logout">
+      <input type="submit" value="Logout">
+    </form>
+    </body></html>
+  `;
+    },
 };
 
 const server = Hapi.server({ port: 8000 });
 
 exports.start = async () => {
-
-    await server.register(require('../'));
-
-    const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
-    server.app.cache = cache;
+    await server.register(require('hapi-auth-cookie'));
 
     server.auth.strategy('session', 'cookie', {
+        // Don't forget to change it to your own secret password!
         password: 'password-should-be-32-characters',
         cookie: 'sid-example',
         redirectTo: '/login',
-        isSecure: false,
+        isSecure: false, // For working via HTTP in localhost
         validateFunc: async (request, session) => {
+            const account = users.find((user) => (user.id = session.id));
 
-            const cached = await cache.get(session.sid);
-            const out = {
-                valid: !!cached
-            };
-
-            if (out.valid) {
-                out.credentials = cached.account;
+            // Must return valid: false for invalid cookies
+            if (!account) {
+                return { valid: false };
             }
 
-            return out;
-        }
+            return { valid: true, credentials: account };
+        },
     });
 
     server.auth.default('session');
 
     server.route([
-        { method: 'GET', path: '/', options: { handler: home } },
-        { method: ['GET', 'POST'], path: '/login', options: { handler: login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
-        { method: 'GET', path: '/logout', options: { handler: logout } }
+        {
+            method: 'GET',
+            path: '/',
+            options: {
+                handler: (request, h) => {
+                    return renderHtml.home(request.auth.credentials.name);
+                },
+            },
+        },
+        {
+            method: 'GET',
+            path: '/login',
+            options: {
+                auth: { mode: 'try' },
+                plugins: { 'hapi-auth-cookie': { redirectTo: false } },
+                handler: async (request, h) => {
+                    if (request.auth.isAuthenticated) {
+                        return h.redirect('/');
+                    }
+
+                    return renderHtml.login();
+                },
+            },
+        },
+        {
+            method: 'POST',
+            path: '/login',
+            options: {
+                auth: { mode: 'try' },
+                handler: async (request, h) => {
+                    const { username, password } = request.payload;
+
+                    if (!username || !password) {
+                        return renderHtml.login('Missing username or password');
+                    }
+
+                    // Try to find user with given credentials
+                    const account = users.find(
+                        (user) => user.name === username && user.password === password
+                    );
+
+                    if (!account) {
+                        return renderHtml.login('Invalid username or password');
+                    }
+
+                    request.cookieAuth.set({ id: account.id });
+
+                    return h.redirect('/');
+                },
+            },
+        },
+        {
+            method: 'GET',
+            path: '/logout',
+            options: {
+                handler: (request, h) => {
+                    request.cookieAuth.clear();
+                    return h.redirect('/');
+                },
+            },
+        },
     ]);
 
     await server.start();
@@ -197,16 +211,15 @@ exports.start = async () => {
     console.log(`Server started at: ${server.info.uri}`);
 };
 
-internals.start = async function () {
-
+internals.start = async function() {
     try {
         await exports.start();
-    }
-    catch (err) {
+    } catch (err) {
         console.error(err.stack);
         process.exit(1);
     }
 };
 
 internals.start();
+
 ```
