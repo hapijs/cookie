@@ -1,6 +1,7 @@
 'use strict';
 
 const Boom = require('boom');
+const Code = require('code');
 const Hapi = require('hapi');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -8,11 +9,14 @@ const Lab = require('lab');
 const Helpers = require('./helpers');
 
 
-const internals = {};
+const internals = {
+    cookieRx: /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/
+};
 
 
 const lab = exports.lab = Lab.script();
-const { describe, it, expect } = lab;
+const { describe, it } = lab;
+const { expect } = Code;
 
 
 describe('scheme', () => {
@@ -35,7 +39,7 @@ describe('scheme', () => {
 
         expect(() => {
 
-            server.auth.strategy('session', 'cookie', { password: 'password-should-be-32-characters' });
+            server.auth.strategy('session', 'cookie', { cookie: { password: 'password-should-be-32-characters' } });
             server.auth.default('session');
         }).to.not.throw();
     });
@@ -47,7 +51,7 @@ describe('scheme', () => {
 
         expect(() => {
 
-            server.auth.strategy('session', 'cookie', { password: Buffer.from('foobar') });
+            server.auth.strategy('session', 'cookie', { cookie: { password: Buffer.from('foobar') } });
         }).to.not.throw();
     });
 
@@ -70,8 +74,10 @@ describe('scheme', () => {
         expect(() => {
 
             server.auth.strategy('session', 'cookie', {
-                password: 'password-should-be-32-characters',
-                keepAlive: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    keepAlive: true
+                }
             });
         }).to.throw();
     });
@@ -82,11 +88,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('session', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                clearInvalid: true,
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 const override = Hoek.clone(session);
@@ -109,7 +117,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -142,11 +150,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 const override = Hoek.clone(session);
@@ -192,11 +202,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 const override = Hoek.clone(session);
@@ -236,13 +248,13 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/logout', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(200);
         expect(res2.result).to.equal('logged-out');
-        expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com; Path=/');
+        expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com');
     });
 
     it('fails a request with invalid session', async () => {
@@ -251,11 +263,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 const override = Hoek.clone(session);
@@ -277,11 +291,10 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
-
-        expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com; Path=/');
+        expect(res2.headers['set-cookie'][0]).to.equal('special=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Domain=example.com');
         expect(res2.statusCode).to.equal(401);
     });
 
@@ -291,11 +304,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: false,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: false,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 const override = Hoek.clone(session);
@@ -317,7 +332,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -331,10 +346,12 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            cookie: 'special',
-            clearInvalid: true
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                name: 'special'
+            }
         });
         server.auth.default('default');
 
@@ -346,7 +363,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -360,10 +377,12 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 throw new Error('boom');
@@ -379,7 +398,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -410,9 +429,11 @@ describe('scheme', () => {
         await server.register(require('../'));
         await server.register(plugin);
         server.auth.strategy('first', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            cookie: 'first',
+            cookie: {
+                password: 'password-should-be-32-characters',
+                ttl: 60 * 1000,
+                name: 'first'
+            },
             validateFunc: function (request, session) {
 
                 throw Boom.unauthorized(null, 'first');
@@ -449,7 +470,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'first=' + cookie[1] } });
 
@@ -466,10 +487,12 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                domain: 'example.com',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 const override = Hoek.clone(session);
@@ -509,12 +532,14 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            path: '/example-path',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                path: '/example-path',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 return {
@@ -532,7 +557,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -546,12 +571,14 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            path: '/subpath',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                path: '/subpath',
+                name: 'special'
+            },
             validateFunc: function (request, session) {
 
                 return {
@@ -586,7 +613,7 @@ describe('scheme', () => {
         const header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
         expect(header[0]).to.contain('Path=/subpath');
 
         const res2 = await server.inject({ method: 'GET', url: '/subpath/resource', headers: { cookie: 'special=' + cookie[1] } });
@@ -601,11 +628,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                name: 'special'
+            },
             keepAlive: true
         });
         server.auth.default('default');
@@ -617,7 +646,7 @@ describe('scheme', () => {
         let header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -633,11 +662,13 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            domain: 'example.com',
-            cookie: 'special',
-            clearInvalid: true,
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000,
+                domain: 'example.com',
+                name: 'special'
+            },
             keepAlive: true,
             validateFunc: function (request, session) {
 
@@ -660,7 +691,7 @@ describe('scheme', () => {
         let header = res.headers['set-cookie'];
         expect(header.length).to.equal(1);
         expect(header[0]).to.contain('Max-Age=60');
-        const cookie = header[0].match(/(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/);
+        const cookie = header[0].match(internals.cookieRx);
 
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
@@ -680,10 +711,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -716,10 +749,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -745,7 +780,7 @@ describe('scheme', () => {
 
             const res = await server.inject('/login/steve');
 
-            const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+            const pattern = internals.cookieRx;
             expect(res.result).to.equal('steve');
             const header = res.headers['set-cookie'];
             expect(header.length).to.equal(1);
@@ -763,10 +798,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -799,10 +836,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -835,10 +874,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -874,10 +915,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -903,7 +946,7 @@ describe('scheme', () => {
 
             const res = await server.inject('/login/steve');
 
-            const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+            const pattern = internals.cookieRx;
             expect(res.result).to.equal('steve');
             const header = res.headers['set-cookie'];
             expect(header.length).to.equal(1);
@@ -921,10 +964,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -957,10 +1002,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -993,10 +1040,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 60 * 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -1032,10 +1081,12 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 1000,
-                cookie: 'special',
-                clearInvalid: true
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    clearInvalid: true,
+                    ttl: 1000,
+                    name: 'special'
+                }
             });
             server.auth.default('default');
 
@@ -1062,7 +1113,7 @@ describe('scheme', () => {
 
             const res = await server.inject('/login/steve');
 
-            const pattern = /(?:[^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)\s*=\s*(?:([^\x00-\x20\"\,\;\\\x7F]*))/;
+            const pattern = internals.cookieRx;
             expect(res.result).to.equal('steve');
             const header = res.headers['set-cookie'];
             expect(header.length).to.equal(1);
@@ -1083,8 +1134,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login',
                 appendNext: true
             });
@@ -1109,8 +1162,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: (request) => 'http://example.com/login?widget=' + request.query.widget,
                 appendNext: true
             });
@@ -1135,8 +1190,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: false,
                 appendNext: true
             });
@@ -1162,8 +1219,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: () => false,
                 appendNext: true
             });
@@ -1194,8 +1253,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login',
                 appendNext: true
             });
@@ -1228,8 +1289,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: true
             });
@@ -1254,8 +1317,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: false
             });
@@ -1277,11 +1342,13 @@ describe('scheme', () => {
         it('uses the updated path by default when onRequest re-routes', async () => {
 
             const server = new Hapi.Server();
-            await  server.register(require('../'));
+            await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: true
             });
@@ -1313,8 +1380,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: { raw: true }
             });
@@ -1346,8 +1415,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: { name: 'return_to' }
             });
@@ -1372,8 +1443,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: 'done'
             });
@@ -1398,8 +1471,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login',
                 appendNext: true
             });
@@ -1424,8 +1499,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login',
                 appendNext: true
             });
@@ -1449,8 +1526,10 @@ describe('scheme', () => {
             await server.register(require('../'));
 
             server.auth.strategy('default', 'cookie', {
-                password: 'password-should-be-32-characters',
-                ttl: 60 * 1000,
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    ttl: 60 * 1000
+                },
                 redirectTo: 'http://example.com/login',
                 appendNext: true
             });
@@ -1475,9 +1554,11 @@ describe('scheme', () => {
         await server.register(require('../'));
 
         server.auth.strategy('default', 'cookie', {
-            password: 'password-should-be-32-characters',
-            ttl: 60 * 1000,
-            clearInvalid: true
+            cookie: {
+                password: 'password-should-be-32-characters',
+                clearInvalid: true,
+                ttl: 60 * 1000
+            }
         });
         server.auth.default('default');
 
@@ -1488,7 +1569,7 @@ describe('scheme', () => {
         const res = await server.inject({ url: '/', headers: { cookie: 'sid=123456' } });
 
         expect(res.statusCode).to.equal(401);
-        expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict; Path=/');
+        expect(res.headers['set-cookie'][0]).to.equal('sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict');
     });
 
     it('supports many strategies', async () => {
@@ -1499,9 +1580,11 @@ describe('scheme', () => {
         expect(() => {
 
             const options = {
-                cookie: 'cookieAuth',
-                requestDecoratorName: 'cookieAuth',
-                password: 'password-should-be-32-characters'
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    name: 'cookieAuth'
+                },
+                requestDecoratorName: 'cookieAuth'
             };
             server.auth.strategy('default', 'cookie', options);
         }).to.not.throw();
@@ -1509,12 +1592,13 @@ describe('scheme', () => {
         expect(() => {
 
             const options = {
-                cookie: 'anotherCookieAuth',
-                requestDecoratorName: 'anotherCookieAuth',
-                password: 'password-should-be-32-characters'
+                cookie: {
+                    password: 'password-should-be-32-characters',
+                    name: 'anotherCookieAuth'
+                },
+                requestDecoratorName: 'anotherCookieAuth'
             };
             server.auth.strategy('notDefault', 'cookie', options);
         }).to.not.throw();
     });
-
 });
