@@ -82,10 +82,14 @@ registered more than once.
 'use strict';
 
 const Hapi = require('hapi');
+
+
 const internals = {};
 
+
 // Simulate database for demo
-const users = [
+
+internals.users = [
     {
         id: 1,
         name: 'john',
@@ -93,8 +97,10 @@ const users = [
     },
 ];
 
-const renderHtml = {
+
+internals.renderHtml = {
     login: (message) => {
+
         return `
     <html><head><title>Login page</title></head><body>
     ${message ? '<h3>' + message + '</h3><br/>' : ''}
@@ -103,9 +109,10 @@ const renderHtml = {
       Password: <input type="password" name="password"><br/>
     <input type="submit" value="Login"></form>
     </body></html>
-  `;
+      `;
     },
     home: (name) => {
+
         return `
     <html><head><title>Login page</title></head><body>
     <h3>Welcome ${name}! You are logged in!</h3>
@@ -113,31 +120,39 @@ const renderHtml = {
       <input type="submit" value="Logout">
     </form>
     </body></html>
-  `;
-    },
+      `;
+    }
 };
 
-const server = Hapi.server({ port: 8000 });
 
-exports.start = async () => {
+internals.server = async function () {
+
+    const server = Hapi.server({ port: 8000 });
+
     await server.register(require('hapi-auth-cookie'));
 
     server.auth.strategy('session', 'cookie', {
+
         // Don't forget to change it to your own secret password!
         password: 'password-should-be-32-characters',
+
         cookie: 'sid-example',
         redirectTo: '/login',
-        isSecure: false, // For working via HTTP in localhost
-        validateFunc: async (request, session) => {
-            const account = users.find((user) => (user.id = session.id));
 
-            // Must return valid: false for invalid cookies
+         // For working via HTTP in localhost
+        isSecure: false,
+
+        validateFunc: async (request, session) => {
+
+            const account = internals.users.find((user) => (user.id = session.id));
+
             if (!account) {
+                // Must return { valid: false } for invalid cookies
                 return { valid: false };
             }
 
             return { valid: true, credentials: account };
-        },
+        }
     });
 
     server.auth.default('session');
@@ -148,78 +163,90 @@ exports.start = async () => {
             path: '/',
             options: {
                 handler: (request, h) => {
-                    return renderHtml.home(request.auth.credentials.name);
-                },
-            },
+
+                    return internals.renderHtml.home(request.auth.credentials.name);
+                }
+            }
         },
         {
             method: 'GET',
             path: '/login',
             options: {
-                auth: { mode: 'try' },
-                plugins: { 'hapi-auth-cookie': { redirectTo: false } },
+                auth: {
+                    mode: 'try'
+                },
+                plugins: {
+                    'hapi-auth-cookie': {
+                        redirectTo: false
+                    }
+                },
                 handler: async (request, h) => {
+
                     if (request.auth.isAuthenticated) {
                         return h.redirect('/');
                     }
 
-                    return renderHtml.login();
-                },
-            },
+                    return internals.renderHtml.login();
+                }
+            }
         },
         {
             method: 'POST',
             path: '/login',
             options: {
-                auth: { mode: 'try' },
+                auth: {
+                    mode: 'try'
+                },
                 handler: async (request, h) => {
-                    const { username, password } = request.payload;
 
+                    const { username, password } = request.payload;
                     if (!username || !password) {
-                        return renderHtml.login('Missing username or password');
+                        return internals.renderHtml.login('Missing username or password');
                     }
 
                     // Try to find user with given credentials
-                    const account = users.find(
+
+                    const account = internals.users.find(
                         (user) => user.name === username && user.password === password
                     );
 
                     if (!account) {
-                        return renderHtml.login('Invalid username or password');
+                        return internals.renderHtml.login('Invalid username or password');
                     }
 
                     request.cookieAuth.set({ id: account.id });
-
                     return h.redirect('/');
-                },
-            },
+                }
+            }
         },
         {
             method: 'GET',
             path: '/logout',
             options: {
                 handler: (request, h) => {
+
                     request.cookieAuth.clear();
                     return h.redirect('/');
-                },
-            },
-        },
+                }
+            }
+        }
     ]);
 
     await server.start();
-
     console.log(`Server started at: ${server.info.uri}`);
 };
 
+
 internals.start = async function() {
+
     try {
-        await exports.start();
-    } catch (err) {
+        await internals.server();
+    }
+    catch (err) {
         console.error(err.stack);
         process.exit(1);
     }
 };
 
 internals.start();
-
 ```
