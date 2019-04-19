@@ -1,10 +1,16 @@
 {
   "name": "@hapi/cookie",
   "description": "Cookie authentication plugin",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "repository": "git://github.com/hapijs/hapi-auth-cookie",
   "main": "lib/index.js",
-  "keywords": ["hapi", "plugin", "auth", "cookie", "session"],
+  "keywords": [
+    "hapi",
+    "plugin",
+    "auth",
+    "cookie",
+    "session"
+  ],
   "dependencies": {
     "@hapi/boom": "7.x.x",
     "@hapi/bounce": "1.x.x",
