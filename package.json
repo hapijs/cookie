@@ -1,30 +1,24 @@
 {
-  "name": "hapi-auth-cookie",
+  "name": "@hapi/cookie",
   "description": "Cookie authentication plugin",
   "version": "10.0.0",
   "repository": "git://github.com/hapijs/hapi-auth-cookie",
   "main": "lib/index.js",
-  "keywords": [
-    "hapi",
-    "plugin",
-    "auth",
-    "cookie",
-    "session"
-  ],
+  "keywords": ["hapi", "plugin", "auth", "cookie", "session"],
   "dependencies": {
-    "boom": "7.x.x",
-    "bounce": "1.x.x",
-    "hoek": "6.x.x",
-    "joi": "14.x.x"
+    "@hapi/boom": "7.x.x",
+    "@hapi/bounce": "1.x.x",
+    "@hapi/hoek": "6.x.x",
+    "@hapi/joi": "15.x.x"
   },
   "devDependencies": {
-    "code": "5.x.x",
-    "hapi": "18.x.x",
-    "lab": "18.x.x"
+    "@hapi/code": "5.x.x",
+    "@hapi/hapi": "18.x.x",
+    "@hapi/lab": "18.x.x"
   },
   "scripts": {
-    "test": "lab -a code -t 100 -L",
-    "test-cov-html": "lab -a code -r html -o coverage.html"
+    "test": "lab -a @hapi/code -t 100 -L",
+    "test-cov-html": "lab -a @hapi/code -r html -o coverage.html"
   },
   "license": "BSD-3-Clause"
 }

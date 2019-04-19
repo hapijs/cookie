@@ -1,14 +1,12 @@
-### hapi-auth-cookie
+# cookie
 
 [**hapi**](https://github.com/hapijs/hapi) Cookie authentication plugin
 
-[![Build Status](https://secure.travis-ci.org/hapijs/hapi-auth-cookie.png)](http://travis-ci.org/hapijs/hapi-auth-cookie)
-
-Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
+[![Build Status](https://secure.travis-ci.org/hapijs/cookie.svg?branch=master)](http://travis-ci.org/hapijs/cookie)
 
 Cookie authentication provides simple cookie-based session management. The user has to be
 authenticated via other means, typically a web form, and upon successful authentication
-the browser receives a reply with a session cookie. The cookie uses [Iron](https://github.com/hueniverse/iron) to encrypt and sign the session content.
+the browser receives a reply with a session cookie. The cookie uses [Iron](https://github.com/hapi/iron) to encrypt and sign the session content.
 
 Subsequent requests containing the session cookie are authenticated and validated via the provided `validateFunc` in case the cookie's encrypted content requires validation on each request.
 
@@ -82,7 +80,7 @@ registered more than once.
 ```javascript
 'use strict';
 
-const Hapi = require('hapi');
+const Hapi = require('@hapi/hapi');
 
 
 const internals = {};
@@ -130,7 +128,7 @@ internals.server = async function () {
 
     const server = Hapi.server({ port: 8000 });
 
-    await server.register(require('hapi-auth-cookie'));
+    await server.register(require('@hapi/cookie'));
 
     server.auth.strategy('session', 'cookie', {
 

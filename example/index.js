@@ -1,6 +1,7 @@
 'use strict';
 
-const Hapi = require('hapi');
+const Cookie = require('..');
+const Hapi = require('@hapi/hapi');
 
 
 const internals = {
@@ -84,7 +85,7 @@ internals.logout = function (request, h) {
 internals.start = async function () {
 
     const server = Hapi.server({ port: 8000 });
-    await server.register(require('../'));
+    await server.register(Cookie);
 
     const cache = server.cache({ segment: 'sessions', expiresIn: 3 * 24 * 60 * 60 * 1000 });
     server.app.cache = cache;
