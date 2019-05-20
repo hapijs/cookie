@@ -8,7 +8,7 @@
 
 Cookie authentication provides simple cookie-based session management. The user has to be
 authenticated via other means, typically a web form, and upon successful authentication
-the browser receives a reply with a session cookie. The cookie uses [Iron](https://github.com/hapi/iron) to encrypt and sign the session content.
+the browser receives a reply with a session cookie. The cookie uses [Iron](https://github.com/hapijs/iron) to encrypt and sign the session content.
 
 Subsequent requests containing the session cookie are authenticated and validated via the provided `validateFunc` in case the cookie's encrypted content requires validation on each request.
 
