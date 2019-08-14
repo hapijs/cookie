@@ -4,7 +4,7 @@
 
 [**hapi**](https://github.com/hapijs/hapi) Cookie authentication plugin
 
-[![Build Status](https://secure.travis-ci.org/hapijs/cookie.svg?branch=master)](http://travis-ci.org/hapijs/cookie)
+[![Build Status](https://secure.travis-ci.org/hapijs/cookie.svg?branch=master)](http://travis-ci.org/hapijs/cookie) [![Greenkeeper badge](https://badges.greenkeeper.io/hapijs/cookie.svg)](https://greenkeeper.io/)
 
 Cookie authentication provides simple cookie-based session management. The user has to be
 authenticated via other means, typically a web form, and upon successful authentication
