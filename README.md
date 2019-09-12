@@ -148,7 +148,7 @@ internals.server = async function () {
 
         validateFunc: async (request, session) => {
 
-            const account = internals.users.find((user) => (user.id = session.id));
+            const account = internals.users.find((user) => (user.id === session.id));
 
             if (!account) {
                 // Must return { valid: false } for invalid cookies
