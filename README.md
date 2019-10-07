@@ -11,6 +11,6 @@
 ## Useful resources
 
 - [Documentation and API](https://hapi.dev/family/cookie/)
-- [Versions status](https://hapi.dev/resources/status/#cookie)
+- [Versions status](https://hapi.dev/resources/status/#cookie) (builds, dependencies, node versions, licenses, eol)
 - [Project policies](https://hapi.dev/policies/)
 - [Free and commercial support options](https://hapi.dev/support/)
