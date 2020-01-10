@@ -789,7 +789,7 @@ describe('scheme', () => {
 
             const res2 = await server.inject({ method: 'GET', url: '/setKey', headers: { cookie: 'special=' + cookie[1] } });
 
-            expect(res2.statusCode).to.equal(200);
+            expect(res2.statusCode).to.equal(204);
         });
 
         it('throws on missing session when trying to set key', async () => {
@@ -955,7 +955,7 @@ describe('scheme', () => {
 
             const res2 = await server.inject({ method: 'GET', url: '/clearKey', headers: { cookie: 'special=' + cookie[1] } });
 
-            expect(res2.statusCode).to.equal(200);
+            expect(res2.statusCode).to.equal(204);
         });
 
         it('throws when trying to clear a key on missing session', async () => {
@@ -1122,7 +1122,7 @@ describe('scheme', () => {
 
             const res2 = await server.inject({ method: 'GET', url: '/ttl', headers: { cookie: 'special=' + cookie[1] } });
 
-            expect(res2.statusCode).to.equal(200);
+            expect(res2.statusCode).to.equal(204);
         });
     });
 
@@ -1352,6 +1352,7 @@ describe('scheme', () => {
                 redirectTo: 'http://example.com/login?mode=1',
                 appendNext: true
             });
+
             server.auth.default('default');
 
             server.route({
