@@ -400,9 +400,17 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
         const cookie = header[0].match(internals.cookieRx);
 
+        let error;
+        server.ext('onPreResponse', (request, h) => {
+
+            error = request.response.data;
+            return h.continue;
+        });
+
         const res2 = await server.inject({ method: 'GET', url: '/resource', headers: { cookie: 'special=' + cookie[1] } });
 
         expect(res2.statusCode).to.equal(401);
+        expect(error).to.be.an.error('boom');
     });
 
     it('uauthorized error in validation function fails over to subsequent authentication scheme', async () => {
