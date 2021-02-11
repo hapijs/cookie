@@ -31,7 +31,7 @@ The `'cookie`' scheme takes the following options:
   current session for a new `ttl` duration. Defaults to `false`.
 - `redirectTo` - optional login URI or function `function(request)` that returns a URI to redirect unauthenticated requests to. Note that it will only
   trigger when the authentication mode is `'required'`. To enable or disable redirections for a specific route,
-  set the route `plugins` config (`{ options: { plugins: { 'hapi-auth-cookie': { redirectTo: false } } } }`).
+  set the route `plugins` config (`{ options: { plugins: { cookie: { redirectTo: false } } } }`).
   Defaults to no redirection.
 - `appendNext` - if `redirectTo` is `true`, can be a boolean, string, or object. Defaults to `false`.
     - if set to `true`, a string, or an object, appends the current request path to the query component
@@ -175,7 +175,7 @@ internals.server = async function () {
                     mode: 'try'
                 },
                 plugins: {
-                    'hapi-auth-cookie': {
+                    cookie: {
                         redirectTo: false
                     }
                 },

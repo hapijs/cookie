@@ -116,7 +116,7 @@ internals.start = async function () {
 
     server.route([
         { method: 'GET', path: '/', config: { handler: internals.home } },
-        { method: ['GET', 'POST'], path: '/login', config: { handler: internals.login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
+        { method: ['GET', 'POST'], path: '/login', config: { handler: internals.login, auth: { mode: 'try' }, plugins: { cookie: { redirectTo: false } } } },
         { method: 'GET', path: '/logout', config: { handler: internals.logout } }
     ]);
 
