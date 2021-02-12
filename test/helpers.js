@@ -5,7 +5,7 @@ exports.loginWithResourceEndpoint = (server) => {
 
     server.route({
         method: 'GET', path: '/login/{user}',
-        config: {
+        options: {
             auth: { mode: 'try' },
             handler: function (request, h) {
 
