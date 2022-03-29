@@ -55,14 +55,14 @@ describe('scheme', () => {
         }).to.not.throw();
     });
 
-    it('fails if validateFunc is not a function', async () => {
+    it('fails if validate is not a function', async () => {
 
         const server = Hapi.server();
         await server.register(require('../'));
 
         expect(() => {
 
-            server.auth.strategy('session', 'cookie', { validateFunc: 'not a function' });
+            server.auth.strategy('session', 'cookie', { validate: 'not a function' });
         }).to.throw();
     });
 
@@ -95,13 +95,13 @@ describe('scheme', () => {
                 clearInvalid: true,
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }
@@ -157,13 +157,13 @@ describe('scheme', () => {
                 domain: 'example.com',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }
@@ -209,13 +209,13 @@ describe('scheme', () => {
                 domain: 'example.com',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }
@@ -270,13 +270,13 @@ describe('scheme', () => {
                 domain: 'example.com',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }
@@ -311,13 +311,13 @@ describe('scheme', () => {
                 domain: 'example.com',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }
@@ -383,7 +383,7 @@ describe('scheme', () => {
                 ttl: 60 * 1000,
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 throw new Error('boom');
             }
@@ -442,7 +442,7 @@ describe('scheme', () => {
                 ttl: 60 * 1000,
                 name: 'first'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 throw Boom.unauthorized(null, 'first');
             }
@@ -501,13 +501,13 @@ describe('scheme', () => {
                 domain: 'example.com',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }
@@ -548,10 +548,10 @@ describe('scheme', () => {
                 path: '/example-path',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 return {
-                    valid: session.user === 'valid'
+                    isValid: session.user === 'valid'
                 };
             }
         });
@@ -587,10 +587,10 @@ describe('scheme', () => {
                 path: '/subpath',
                 name: 'special'
             },
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 return {
-                    valid: session.user === 'valid'
+                    isValid: session.user === 'valid'
                 };
             }
         });
@@ -664,7 +664,7 @@ describe('scheme', () => {
         expect(header[0]).to.contain('Max-Age=60');
     });
 
-    it('extends ttl automatically (validateFunc)', async () => {
+    it('extends ttl automatically (validate)', async () => {
 
         const server = Hapi.server();
         await server.register(require('../'));
@@ -678,13 +678,13 @@ describe('scheme', () => {
                 name: 'special'
             },
             keepAlive: true,
-            validateFunc: function (request, session) {
+            validate: function (request, session) {
 
                 const override = Hoek.clone(session);
                 override.something = 'new';
 
                 return {
-                    valid: session.user === 'valid',
+                    isValid: session.user === 'valid',
                     credentials: override
                 };
             }

@@ -97,14 +97,14 @@ internals.start = async function () {
             isSecure: false
         },
         redirectTo: '/login',
-        validateFunc: async (request, session) => {
+        validate: async (request, session) => {
 
             const cached = await cache.get(session.sid);
             const out = {
-                valid: !!cached
+                isValid: !!cached
             };
 
-            if (out.valid) {
+            if (out.isValid) {
                 out.credentials = cached.account;
             }
 

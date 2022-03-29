@@ -5,7 +5,7 @@ Cookie authentication provides simple cookie-based session management. The user 
 authenticated via other means, typically a web form, and upon successful authentication
 the browser receives a reply with a session cookie. The cookie uses [Iron](https://github.com/hapijs/iron) to encrypt and sign the session content.
 
-Subsequent requests containing the session cookie are authenticated and validated via the provided `validateFunc` in case the cookie's encrypted content requires validation on each request.
+Subsequent requests containing the session cookie are authenticated and validated via the provided `validate` in case the cookie's encrypted content requires validation on each request.
 
 It is important to remember a couple of things:
 
@@ -41,7 +41,7 @@ The `'cookie`' scheme takes the following options:
     - set the `raw` property of the object to `true` to determine the current request path based on
       the raw node.js request object received from the HTTP server callback instead of the processed
       hapi request object
-- `async validateFunc` - an optional session validation function used to validate the content of the
+- `async validate` - an optional session validation function used to validate the content of the
   session cookie on each request. Used to verify that the internal session state is still valid
   (e.g. user account still exists). The function has the signature `function(request, session)`
   where:
@@ -49,7 +49,7 @@ The `'cookie`' scheme takes the following options:
     - `session` - is the session object set via `request.cookieAuth.set()`.
 
   Must return an object that contains:
-    - `valid` - `true` if the content of the session is valid, otherwise `false`.
+    - `isValid` - `true` if the content of the session is valid, otherwise `false`.
     - `credentials` - a credentials object passed back to the application in
       `request.auth.credentials`. If value is `null` or `undefined`, defaults to `session`. If
       set, will override the current cookie as if `request.cookieAuth.set()` was called.
@@ -141,16 +141,16 @@ internals.server = async function () {
 
         redirectTo: '/login',
 
-        validateFunc: async (request, session) => {
+        validate: async (request, session) => {
 
             const account = internals.users.find((user) => (user.id === session.id));
 
             if (!account) {
-                // Must return { valid: false } for invalid cookies
-                return { valid: false };
+                // Must return { isValid: false } for invalid cookies
+                return { isValid: false };
             }
 
-            return { valid: true, credentials: account };
+            return { isValid: true, credentials: account };
         }
     });
 
