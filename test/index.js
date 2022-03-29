@@ -1241,7 +1241,7 @@ describe('scheme', () => {
                 path: '/',
                 options: {
                     plugins: {
-                        'hapi-auth-cookie': {}
+                        cookie: {}
                     },
                     handler: function (request, h) {
 
@@ -1279,7 +1279,7 @@ describe('scheme', () => {
                 },
                 options: {
                     plugins: {
-                        'hapi-auth-cookie': {
+                        cookie: {
                             redirectTo: false
                         }
                     }

@@ -115,9 +115,35 @@ internals.start = async function () {
     server.auth.default('session');
 
     server.route([
-        { method: 'GET', path: '/', config: { handler: internals.home } },
-        { method: ['GET', 'POST'], path: '/login', config: { handler: internals.login, auth: { mode: 'try' }, plugins: { 'hapi-auth-cookie': { redirectTo: false } } } },
-        { method: 'GET', path: '/logout', config: { handler: internals.logout } }
+        {
+            method: 'GET',
+            path: '/',
+            options: {
+                handler: internals.home
+            }
+        },
+        {
+            method: ['GET', 'POST'],
+            path: '/login',
+            options: {
+                handler: internals.login,
+                auth: {
+                    mode: 'try'
+                },
+                plugins: {
+                    cookie: {
+                        redirectTo: false
+                    }
+                }
+            }
+        },
+        {
+            method: 'GET',
+            path: '/logout',
+            options: {
+                handler: internals.logout
+            }
+        }
     ]);
 
     await server.start();
